@@ -1,0 +1,10 @@
+﻿  Formulas.cpp
+D:\Progs\VisualSaves\Diplom\Solution\Solution\Formulas.cpp(151,23): warning C4018: <: несоответствие типов со знаком и без знака
+D:\Progs\VisualSaves\Diplom\Solution\Solution\Formulas.cpp(368,23): warning C4018: <: несоответствие типов со знаком и без знака
+D:\Progs\VisualSaves\Diplom\Solution\Solution\Formulas.cpp(427,23): warning C4018: <: несоответствие типов со знаком и без знака
+D:\Progs\VisualSaves\Diplom\Solution\Solution\Formulas.cpp(466,19): warning C4018: <: несоответствие типов со знаком и без знака
+D:\Progs\VisualSaves\Diplom\Solution\Solution\Formulas.cpp(478,23): warning C4018: <: несоответствие типов со знаком и без знака
+D:\Progs\VisualSaves\Diplom\Solution\Solution\Formulas.cpp(487,23): warning C4018: <: несоответствие типов со знаком и без знака
+D:\Progs\VisualSaves\Diplom\Solution\Solution\Formulas.cpp(680,31): warning C4018: <: несоответствие типов со знаком и без знака
+D:\Progs\VisualSaves\Diplom\Solution\Solution\Formulas.cpp(714): warning C4715: W: значение возвращается не при всех путях выполнения
+  Solution.vcxproj -> D:\Progs\VisualSaves\Diplom\Solution\Debug\Solution.exe
