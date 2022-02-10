@@ -2,40 +2,29 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
-#include <functional>
+#include "LocalSolution.h"
 #include <vector>
-using namespace std;
-
-struct LocalArea //локальные области
-{
-    double h_x, h_y, h_z; // Длины сторон
-    double lambda, sigma, hi; // lambda и gamma в области
-    int size;
-    int* globalNum;  // Номера узлов
-    double *x, *y, *z;
-};
-
-const int N_TRIANGLE_PRIZM_KNOTS = 6;
-
-const int N_HEXAGON_KNOTS = 8;
 
 
-struct Knot // Координаты узлов
-{
-    double x, y, z;
-};
 
 struct Bound // Граница
 {
     int globalNum; // Номера узла
 };
+
 struct TimeGrid
 {
     double start;	// Начальное время
     double end;	// Конечное время
     int nSteps;	// Количество шагов по времени
-    double h0;
-    double q;	// Множитель для подсчета следующих шагов
+    double k;	// Множитель для подсчета следующих шагов
+};
+
+struct TimeScheme {
+    double time[4]; // 4 слоя по времени
+    double** q;
+    double k;
+    double h;   
 };
 
 //TimeGrid* TIME_GRID;	// сетка по времени
@@ -48,15 +37,18 @@ struct InitialData // Исходные данные
 
     int num_locals; // Количество  локальных элементов
     int num_bounds; // Количество границ
-    double** global_matrix; // Глобальная матрица
+    TimeGrid* time_g;
+};
+
+struct SLAU {
+    int size;
     double** global_M; // Глобальная M
     double** global_G; // Глобальная G
     double** global_A; // Глобальная A
     double* global_b;
-    double* global_d;
-    double* global_vector; // Глобальный вектор
-    double* q; // Решение в узлах (вектор весов)
-    TimeGrid* time_g;
+    double* global_d;   // Глобальный вектор правой части
+    double* q;  // Решение в узлах (вектор весов)
+    double* u;
 };
 
 
@@ -103,4 +95,10 @@ double prime_by_var(int what, double* Knot, double ksi, double etta, double teth
 double phi(int index, double ksi, double etta, double tetha);
 
 double det_Jacobian(double* x, double* y, double* z, double ksi, double etta, double tetha);
+
+void CreateTimeScheme(TimeGrid& grid, TimeScheme& scheme);
+
+void CreateSLAU(int sizeSLAU, SLAU& slau);
+
+void NextScheme(TimeScheme& scheme, int nKnots);
 

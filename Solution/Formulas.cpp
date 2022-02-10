@@ -30,65 +30,6 @@ void time(Knot coord, double time) {
 
 }
 
-
-function<double(double, double, double, int, int, double*, double*, double*)> Mij = [](double ksi, double etta, double tetha, int i, int j, double* x, double* y, double* z)
-{
-    return phi(i, ksi, etta, tetha) * phi(j, ksi, etta, tetha) * det_Jacobian(x, y, z, ksi, etta, tetha);
-};
-
-double* calc_grad(int index, double ksi, double etta, double tetha)
-{
-    return new double[3]{ d_phi(index,1,ksi,etta,tetha), d_phi(index,2,ksi,etta,tetha), d_phi(index,3,ksi,etta,tetha) };
-}
-
-function<double(double, double, double, int, int, double*, double*, double*)> Gij = [](double ksi, double etta, double tetha, int i, int j, double* x, double* y, double* z)
-{
-  
-
-    double* J_grad_i = new double[3]{};
-    double* J_grad_j = new double[3]{};
-
-    double** reversed_Jacobian = new double* [3]
-    {
-        new double[3]{},
-        new double[3]{},
-        new double[3]{}
-    };
-
-
-    double** Jacobian = new double* [3]
-    {
-        new double[3]{prime_by_var(1,x, ksi, etta, tetha),prime_by_var(1,y, ksi, etta, tetha),prime_by_var(1,z, ksi, etta, tetha)},
-        new double[3]{prime_by_var(2,x, ksi,etta,tetha) ,prime_by_var(2,y, ksi,etta,tetha),prime_by_var(2,z, ksi,etta,tetha)},
-        new double[3]{prime_by_var(3,x, ksi,etta,tetha),prime_by_var(3,y, ksi,etta,tetha),prime_by_var(3,z, ksi,etta,tetha)}
-    };
-
-    for (int i = 0; i < 3; i++)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            double min[4]{};
-            int k = 0;
-            for (int im = 0; im < 3; im++)
-                for (int jm = 0; jm < 3; jm++)
-                {
-                    if (im != i && jm != j)
-                        min[k++] = Jacobian[im][jm];
-                }
-            reversed_Jacobian[j][i] = pow(-1, i + j + 2) * (min[0] * min[3] - min[1] * min[2]);
-        }
-    }
-        
-      
-  
-    mult_matr_by_vect(3, reversed_Jacobian, calc_grad(i, ksi, etta, tetha), J_grad_i);
-    mult_matr_by_vect(3, reversed_Jacobian, calc_grad(j, ksi, etta, tetha), J_grad_j);
-
-    return scalar(3, J_grad_i, J_grad_j) / det_Jacobian(x,y,z,ksi,etta,tetha);
-};
-
-
-
 // Чтение координат узлов
 void ReadCross(string pathFile, vector<Knot>& knots)
 {
@@ -153,7 +94,7 @@ void ReadBound(string pathFile, vector<Bound>& bounds)
 void ReadTime(string pathFile, TimeGrid& time)
 {
     ifstream in(pathFile);
-    in >> time.start >> time.end >> time.q >> time.nSteps;
+    in >> time.start >> time.end >> time.k >> time.nSteps;
     in.close();
 }
 
@@ -167,106 +108,6 @@ void InitData(InitialData* data) //функция считывания исходных данных(кроме крае
     ReadBound("EdgeBoundary_1.txt", data->bounds);
 
     ReadTime("grid_time.txt", *data->time_g);
-
-    // перенести в другое место
-
-    data->global_matrix = new double* [data->knots.size()]{};  // Инициализируем размерность глобальной матрицы
-    data->global_M = new double* [data->knots.size()]{};  // Инициализируем размерность глобальной матрицы
-    data->global_G = new double* [data->knots.size()]{};  // Инициализируем размерность глобальной матрицы
-    //---data->global_A = new double* [data->nKnots]{};  // Инициализируем размерность глобальной матрицы
-    for (int i = 0; i < data->knots.size(); i++) {
-        data->global_matrix[i] = new double[data->knots.size()]{};
-        data->global_M[i] = new double[data->knots.size()]{};
-        data->global_G[i] = new double[data->knots.size()]{};
-        //---data->global_A[indLocalArea] = new double[data->nKnots]{};
-    }
-
-    data->global_vector = new double[data->knots.size()]{};   // Инициализируем размерность глобального вектора
-    data->q = new double[data->knots.size()]{};   // Инициализируем размерность вектора весов
-    data->global_b = new double[data->knots.size()]{};
- 
-    // Подсчет начального шага
-    data->time_g->h0 = data->time_g->end - data->time_g->start;
-
-    if (data->time_g->q != 1)
-    {
-        // Шаг неравномерный
-        data->time_g->h0 *= (1. - data->time_g->q) / (1. - pow(data->time_g->q, data->time_g->nSteps));
-    }
-    else
-    {
-        // Шаг равномерный
-        data->time_g->h0 /= data->time_g->nSteps;
-    }
-    
-}
-
-void calc_local_M(LocalArea local, double M[8][8]) // Вычисление локальной матрицы массы
-{
-    //double M_1[8][8] =
-    //{
-    //    {8, 4, 4, 2, 4, 2, 2, 1},
-    //    {4, 8, 2, 4, 2, 4, 1, 2},
-    //    {4, 2, 8, 4, 2, 1, 4, 2},
-    //    {2, 4, 4, 8, 1, 2, 2, 4},
-    //    {4, 2, 2, 1, 8, 4, 4, 2},
-    //    {2, 4, 1, 2, 4, 8, 2, 4},
-    //    {2, 1, 4, 2, 4, 2, 8, 4},
-    //    {1, 2, 2, 4, 2, 4, 4, 8}
-    //};
-
-    for (int i = 0; i < 8; i++)
-        for (int j = 0; j < 8; j++)
-            M[i][j] = Integrate(Mij,i,j, local.x, local.y, local.z);
-}
-
-void calc_local_G(LocalArea local, double G[8][8]) // Вычисление локальной матрицы жесткости
-{
-    //double G_x[8][8] =  // матрица жесткости(x)
-    //{
-    //    {4, -4, 2, -2, 2, -2, 1, -1},
-    //    {-4, 4, -2, 2, -2, 2, -1, 1},
-    //    {2, -2, 4, -4, 1, -1, 2, -2},
-    //    {-2, 2, -4, 4, -1, 1, -2, 2},
-    //    {2, -2, 1, -1, 4, -4, 2, -2},
-    //    {-2, 2, -1, 1, -4, 4, -2, 2},
-    //    {1, -1, 2, -2, 2, -2, 4, -4},
-    //    {-1, 1, -2, 2, -2, 2, -4, 4}
-    //};
-
-    //double G_y[8][8] =  // матрица жесткости(y)
-    //{
-    //    {4, 2, -4, -2, 2, 1, -2, -1},
-    //    {2, 4, -2, -4, 1, 2, -1, -2},
-    //    {-4, -2, 4, 2, -2, -1, 2, 1},
-    //    {-2, -4, 2, 4, -1, -2, 1, 2},
-    //    {2, 1, -2, -1, 4, 2, -4, -2},
-    //    {1, 2, -1, -2, 2, 4, -2, -4},
-    //    {-2, -1, 2, 1, -4, -2, 4, 2},
-    //    {-1, -2, 1, 2, -2, -4, 2, 4}
-    //};
-
-    //double G_z[8][8] =  // матрица жесткости(z)
-    //{
-    //    {4, 2, 2, 1, -4, -2, -2, -1},
-    //    {2, 4, 1, 2, -2, -4, -1, -2},
-    //    {2, 1, 4, 2, -2, -1, -4, -2},
-    //    {1, 2, 2, 4, -1, -2, -2, -4},
-    //    {-4, -2, -2, -1, 4, 2, 2, 1},
-    //    {-2, -4, -1, -2, 2, 4, 1, 2},
-    //    {-2, -1, -4, -2, 2, 1, 4, 2},
-    //    {-1, -2, -2, -4, 1, 2, 2, 4}
-    //};
-
-    for (int i = 0; i < 8; i++)
-        for (int j = 0; j < 8; j++)
-            G[i][j] = local.lambda * Integrate(Gij,i,j,local.x,local.y,local.z);
-            /*local.h_x * local.h_y * local.h_z / 36 *
-            (
-                1 / (local.h_x * local.h_x) * G_x[indLocalArea][j] +
-                1 / (local.h_y * local.h_y) * G_y[indLocalArea][j] +
-                1 / (local.h_z * local.h_z) * G_z[indLocalArea][j]
-                );*/
 }
 
 void mult_matr_by_vect(int size, double** matrix, double* vector, double* result)
@@ -291,34 +132,7 @@ void mult_matr_by_vect(int size, double matrix[8][8], double vector[8], double r
     }
 }
 
-void calc_local_F(vector<Knot> knots, LocalArea local, double F[8], double time) // Вычисление локального вектора правой части
-{
-    double M_1[8][8]{};
-    calc_local_M(local, M_1);
 
- /*   double M_1[8][8] =
-    {
-        {8, 4, 4, 2, 4, 2, 2, 1},
-        {4, 8, 2, 4, 2, 4, 1, 2},
-        {4, 2, 8, 4, 2, 1, 4, 2},
-        {2, 4, 4, 8, 1, 2, 2, 4},
-        {4, 2, 2, 1, 8, 4, 4, 2},
-        {2, 4, 1, 2, 4, 8, 2, 4},
-        {2, 1, 4, 2, 4, 2, 8, 4},
-        {1, 2, 2, 4, 2, 4, 4, 8}
-    };*/
-
-    double f[8]{};
-
-    for (int i = 0; i < 8; i++)
-        f[i] = calc_f(knots[local.globalNum[i] - 1], time);
-
-    mult_matr_by_vect(8, M_1, f, F);
-
-    for (int i = 0; i < 8; i++)
-        F[i] *= local.h_x * local.h_y * local.h_z / 216;
-       
-}
 
 void write(InitialData form, double time) //функция вывода в консоль
 {
@@ -378,7 +192,8 @@ void write(InitialData form, double time) //функция вывода в консоль
 
     }     
 }
-void write_result(InitialData form, double time) //функция вывода в консоль
+
+void write_result(SLAU& slau, double time) //функция вывода в консоль
 {
     cout << endl << "ВРЕМЯ: " << time << endl;
     cout << endl << "Результат в узлах (веса):" << endl;
@@ -395,20 +210,18 @@ void write_result(InitialData form, double time) //функция вывода в консоль
     cout << "|u-u*|" << "|" << endl;
     cout << "|----------------|----------------|----------------|----------------|" << endl;
 
-    for (int i = 0; i < form.knots.size(); i++)
+    for (int i = 0; i < slau.size; i++)
     {
-        double u = calc_u(form.knots[i], time);
-
         cout.setf(ios::left);
         cout << "| ";
         cout.width(15);
         cout << i + 1 << "| ";
         cout.width(15);
-        cout << form.q[i] << "| ";
+        cout << slau.q[i] << "| ";
         cout.width(15);
-        cout << u << "| ";
+        cout << slau.u[i] << "| ";
         cout.width(15);
-        cout << fabs(form.q[i] - u) << "| " << endl;
+        cout << fabs(slau.q[i] - slau.u[i]) << "| " << endl;
     }
 }
 
@@ -420,48 +233,48 @@ double scalar(int size, double* v1, double* v2)
     return sum;
 }
 
-void LOC(InitialData* form)
+void LOC(SLAU* slau)
 {
     int i;
     double nvzk = 0., alfa = 0., beta = 0., skp = 0., eps = 9.999999682655226e-030;
     double* z, * r, * p, * f;
-    form->q = new double[form->knots.size()]{};
-    z = new double[form->knots.size()]{};
-    r = new double[form->knots.size()]{};
-    p = new double[form->knots.size()]{};
-    f = new double[form->knots.size()]{};
+    slau->q = new double[slau->size]{};
+    z = new double[slau->size]{};
+    r = new double[slau->size]{};
+    p = new double[slau->size]{};
+    f = new double[slau->size]{};
     double lastnvzk;
 
-    mult_matr_by_vect(form->knots.size(), form->global_matrix, form->q, f);
+    mult_matr_by_vect(slau->size, slau->global_A, slau->q, f);
 
-    for (i = 0; i < form->knots.size(); i++)
-        z[i] = r[i] = form->global_vector[i] - f[i];
+    for (i = 0; i < slau->size; i++)
+        z[i] = r[i] = slau->global_d[i] - f[i];
 
-    mult_matr_by_vect(form->knots.size(), form->global_matrix, z, p);
-    nvzk = sqrt(scalar(form->knots.size(), r, r)) / sqrt(scalar(form->knots.size(), form->global_vector, form->global_vector));
+    mult_matr_by_vect(slau->size, slau->global_A, z, p);
+    nvzk = sqrt(scalar(slau->size, r, r)) / sqrt(scalar(slau->size, slau->global_d, slau->global_d));
 
     for (int k = 1; k < 100000 && nvzk > eps; k++)
     {
         lastnvzk = nvzk;
-        skp = scalar(form->knots.size(), p, p);
-        alfa = scalar(form->knots.size(), p, r) / skp;
+        skp = scalar(slau->size, p, p);
+        alfa = scalar(slau->size, p, r) / skp;
 
-        for (i = 0; i < form->knots.size(); i++)
+        for (i = 0; i < slau->size; i++)
         {
-            form->q[i] += alfa * z[i];
+            slau->q[i] += alfa * z[i];
             r[i] -= alfa * p[i];
         }
 
-        mult_matr_by_vect(form->knots.size(), form->global_matrix, r, f);
-        beta = -scalar(form->knots.size(), p, f) / skp;
+        mult_matr_by_vect(slau->size, slau->global_A, r, f);
+        beta = -scalar(slau->size, p, f) / skp;
 
-        for (i = 0; i < form->knots.size(); i++)
+        for (i = 0; i < slau->size; i++)
         {
             z[i] = r[i] + beta * z[i];
             p[i] = f[i] + beta * p[i];
         }
 
-        nvzk = sqrt(scalar(form->knots.size(), r, r)) / sqrt(scalar(form->knots.size(), form->global_vector, form->global_vector));
+        nvzk = sqrt(scalar(slau->size, r, r)) / sqrt(scalar(slau->size, slau->global_d, slau->global_d));
     }
 }
 
@@ -512,49 +325,52 @@ double get_u(Knot point, InitialData form) // Получение значения в произвольной 
     return u;
 }
 
-void calc_global_matrix(InitialData* form) // Вычисление глобальной матрицы
+void calc_global_matrix(InitialData form, SLAU& slau) // Вычисление глобальной матрицы
 {
-    for (int i = 0; i < form->num_locals; i++)
+    for (int i = 0; i < form.num_locals; i++)
     {
         double M[8][8]{};
-        calc_local_M(form->locals[i], M);
+        calc_local_M(form.locals[i], M);
 
         double G[8][8]{};
-        calc_local_G(form->locals[i], G);
+        calc_local_G(form.locals[i], G);
 
         double A[8][8]{};
         for (int j = 0; j < 8; j++)
             for (int k = 0; k < 8; k++)
-                form->global_matrix[form->locals[i].globalNum[j]][form->locals[i].globalNum[k]] += A[j][k] = M[j][k] + G[j][k];
+                slau.global_A[form.locals[i].globalNum[j]][form.locals[i].globalNum[k]] += A[j][k] = M[j][k] + G[j][k];
     }
 }
 
-void calc_global_M(InitialData* form) // Вычисление глобальной M
+void calc_global_M(InitialData& form, SLAU& slau) // Вычисление глобальной M
 {
-    for (int i = 0; i < form->num_locals; i++)
+    for (int i = 0; i < form.num_locals; i++)
     {
-        double M[8][8]{};
-        calc_local_M(form->locals[i], M);
+        int size = form.locals[i].size;
+        double** M = new double*[size];
+        for (int j = 0; j < size; j++) M[j] = new double[size];
 
-        for (int j = 0; j < 8; j++)
-            for (int k = 0; k < 8; k++)
-                form->global_M[form->locals[i].globalNum[j]][form->locals[i].globalNum[k]] += M[j][k];
+        calc_local_M(form.locals[i], M);
+
+        for (int j = 0; j < size; j++)
+            for (int k = 0; k < size; k++)
+                slau.global_M[form.locals[i].globalNum[j]][form.locals[i].globalNum[k]] += M[j][k];
     }
 }
-void calc_global_G(InitialData* form) // Вычисление глобальной G
+void calc_global_G(InitialData& form, SLAU& slau) // Вычисление глобальной G
 {
-    for (int i = 0; i < form->num_locals; i++)
+    for (int i = 0; i < form.num_locals; i++)
     {
         double G[8][8]{};
-        calc_local_G(form->locals[i], G);
+        calc_local_G(form.locals[i], G);
 
         for (int j = 0; j < 8; j++)
             for (int k = 0; k < 8; k++)
-                form->global_G[form->locals[i].globalNum[j] - 1][form->locals[i].globalNum[k] - 1] += G[j][k];
+                slau.global_G[form.locals[i].globalNum[j] - 1][form.locals[i].globalNum[k] - 1] += G[j][k];
     }
 }
 
-void calc_global_A(InitialData* form, double t_j, double t_j1, double t_j2, double t_j3) // Вычисление глобальной A
+void calc_global_A(InitialData* form, SLAU& slau, double t_j, double t_j1, double t_j2, double t_j3) // Вычисление глобальной A
 {
    for (int i = 0; i < form->num_locals; i++)
    {
@@ -564,14 +380,14 @@ void calc_global_A(InitialData* form, double t_j, double t_j1, double t_j2, doub
          for (int k = 0; k < 8; k++)
          {
             int ind_2 = form->locals[i].globalNum[k] - 1;
-            form->global_matrix[ind_1][ind_2] =
-               form->locals[i].hi * form->global_M[ind_1][ind_2] *
+            slau.global_A[ind_1][ind_2] =
+               form->locals[i].hi * slau.global_M[ind_1][ind_2] *
                    2 * ((t_j - t_j1) + (t_j - t_j2) + (t_j - t_j3))
                    / ((t_j - t_j3) * (t_j - t_j2) * (t_j - t_j1)) +
-               form->locals[i].sigma * form->global_M[ind_1][ind_2]
+               form->locals[i].sigma * slau.global_M[ind_1][ind_2]
                    * ((t_j - t_j2) * (t_j - t_j1) + (t_j - t_j3) * (t_j - t_j1) + (t_j - t_j3) * (t_j - t_j2))
                    / ((t_j - t_j3) * (t_j - t_j2) * (t_j - t_j1))
-               + form->global_G[ind_1][ind_2];
+               + slau.global_G[ind_1][ind_2];
          }
 
       }
@@ -593,23 +409,25 @@ void matrix_mult_vector(double** matrix, double* vector, int MAX, double* result
             result[i] += matrix[j][i] * vector[i];
 }
 
-void calc_global_d(InitialData* form, double t_j, double t_j1, double t_j2, double t_j3, double* q_3, double* q_2, double* q_1) // Вычисление глобальной A
+void calc_global_d(InitialData* form, SLAU& slau, double t_j, double t_j1, double t_j2, double t_j3, double* q_3, double* q_2, double* q_1) // Вычисление глобальной A
 {
+
+    calc_global_F(form, time);	// Вычисление глобального вектора правой части
     double* Mq_j3, * Mq_j2, * Mq_j1;
     Mq_j3 = new double[form->knots.size()]{};
     Mq_j2 = new double[form->knots.size()]{};
     Mq_j1 = new double[form->knots.size()]{};
 
-    matrix_mult_vector(form->global_M, q_3, form->knots.size(), Mq_j3);
-    matrix_mult_vector(form->global_M, q_2, form->knots.size(), Mq_j2);
-    matrix_mult_vector(form->global_M, q_1, form->knots.size(), Mq_j1);
+    matrix_mult_vector(slau.global_M, q_3, form->knots.size(), Mq_j3);
+    matrix_mult_vector(slau.global_M, q_2, form->knots.size(), Mq_j2);
+    matrix_mult_vector(slau.global_M, q_1, form->knots.size(), Mq_j1);
 
    for (int i = 0; i < form->num_locals; i++)
    {
       for (int j = 0; j < 8; j++)
       {
          int ind_1 = form->locals[i].globalNum[j] - 1;
-         form->global_vector[ind_1] = form->global_b[ind_1] 
+         slau.global_d[ind_1] = slau.global_b[ind_1]
             - form->locals[i].sigma * Mq_j3[ind_1] * ((t_j - t_j2) * (t_j - t_j1)) / ((t_j3 - t_j2) * (t_j3 - t_j1) * (t_j3 - t_j))
             - form->locals[i].sigma * Mq_j2[ind_1] * ((t_j - t_j3) * (t_j - t_j1)) / ((t_j2 - t_j3) * (t_j2 - t_j1) * (t_j2 - t_j))
             - form->locals[i].sigma * Mq_j1[ind_1] * ((t_j - t_j3) * (t_j - t_j2)) / ((t_j1 - t_j3) * (t_j1 - t_j2) * (t_j1 - t_j))
@@ -627,7 +445,7 @@ void calc_global_d(InitialData* form, double t_j, double t_j1, double t_j2, doub
 
 }
 
-void calc_global_F(InitialData* form, double time) // Вычисление глобального вектора правой части
+void calc_global_F(InitialData* form, SLAU& slau, double time) // Вычисление глобального вектора правой части
 {
     for (int i = 0; i < form->num_locals; i++)
     {
@@ -636,12 +454,12 @@ void calc_global_F(InitialData* form, double time) // Вычисление глобального век
 
         for (int j = 0; j < 8; j++)
         {
-            form->global_b[form->locals[i].globalNum[j] - 1] += F[j];
+            slau.global_b[form->locals[i].globalNum[j] - 1] += F[j];
         }
     }
 }
 
-void calc_first_boundary_conditions(InitialData* form, double time) //учет краевых условий
+void calc_first_boundary_conditions(InitialData* form, SLAU& slau, double time) //учет краевых условий
 {
     for (int i = 0; i < form->num_bounds; i++)
     {
@@ -650,122 +468,78 @@ void calc_first_boundary_conditions(InitialData* form, double time) //учет краев
             int global_num_coord = form->bounds[i].globalNum[j] - 1;
             for (int k = 0; k < form->knots.size(); k++)
             {
-                form->global_matrix[global_num_coord][k] = 0;
+                slau.global_A[global_num_coord][k] = 0;
             }
-            form->global_matrix[global_num_coord][global_num_coord] = 1;
-            form->global_vector[global_num_coord] = calc_u(form->knots[global_num_coord], time);
+            slau.global_A[global_num_coord][global_num_coord] = 1;
+            slau.global_d[global_num_coord] = calc_u(form->knots[global_num_coord], time);
         }
 
     }
 }
 
 
-int mu(int index)
-{
-    return ((index - 1) % 2) + 1;
-}
 
-int v(int index)
-{
-    return ((index - 1) / 2) % 2 + 1;
-}
 
-int nu(int index)
-{
-    return (index - 1) / 4 + 1;
-}
 
-double W(int index, double alpha)
-{
-    switch (index)
-    {
-    case 1: return 1. - alpha;
-    case 2: return alpha;
-    }
-}
 
-double d_phi(int index, int what, double ksi, double etta, double tetha)
+
+
+
+
+void CreateScheme(TimeScheme& scheme, InitialData& data)
 {
-    double d_phi = 0.;
-    switch (what)
+    // Подсчет начального шага
+    scheme.k = data.time_g->k;
+    scheme.h = data.time_g->end - data.time_g->start;
+    scheme.h = (scheme.k == 1) ? scheme.h / data.time_g->nSteps : scheme.h * (1. - data.time_g->k) / (1. - pow(data.time_g->k, data.time_g->nSteps));
+
+
+    double SLAUsize = data.knots.size();
+
+    scheme.time[0] = data.time_g->start;
+    scheme.time[1] = scheme.time[0] + scheme.h;
+    scheme.time[2] = scheme.time[1] + scheme.h * scheme.k;
+    scheme.time[3] = scheme.time[2] + scheme.h * scheme.k * scheme.k;
+    
+    for (int j = 0; j < 3; j++)
     {
-    case 1:    // ksi
-    {
-        d_phi = W(v(index), etta) * W(nu(index), tetha);
-        if (mu(index) == 1) d_phi *= -1;
-        break;
-    }
-    case 2:     // etta
-    {
-        d_phi = W(mu(index), ksi) * W(nu(index), tetha);
-        if (v(index) == 1) d_phi *= -1;
-        break;
-    }
-    case 3:     // tetha
-    {
-        d_phi = W(mu(index), ksi) * W(v(index), etta);
-        if (nu(index) == 1) d_phi *= -1;
-        break;
-    }
+        double time = scheme.time[j];
+        scheme.q[j] = new double[SLAUsize] {};
+        for (int i = 0; i < SLAUsize; i++) scheme.q[0][i] = calc_u(data.knots[i], time);
     }
 
-    return d_phi;
+    scheme.h = scheme.h * scheme.k * scheme.k;
 }
 
-double prime_by_var(int what, double* Knot, double ksi, double etta, double tetha)
+void NextScheme(TimeScheme& scheme, int nKnots)
 {
-    double x = 0.;
-    for (int i = 1; i <= 8; i++)
+    for (int i = 0; i < 3; i++)
     {
-        x += Knot[i-1] * d_phi(i, what, ksi, etta, tetha);
+        scheme.time[i] = scheme.time[i + 1];
+        scheme.q[i] = scheme.q[i + 1];
     }
-    return x;
+
+    scheme.time[3] = scheme.time[2] + scheme.h;
+    scheme.h *= scheme.k;
+    scheme.q[3] = new double[nKnots];
 }
 
-double phi(int index, double ksi, double etta, double tetha)
+
+void CreateSLAU(int sizeSLAU, SLAU& slau)
 {
-    return  W(mu(index), ksi) * W(v(index), etta) * W(nu(index), tetha);
+    slau.size = sizeSLAU;
+    slau.global_A = new double* [slau.size]{};  // Инициализируем размерность глобальной матрицы
+    slau.global_M = new double* [slau.size]{};  // Инициализируем размерность глобальной матрицы
+    slau.global_G = new double* [slau.size]{};  // Инициализируем размерность глобальной матрицы
+   
+    for (int i = 0; i < slau.size; i++) {
+        slau.global_A[i] = new double[slau.size]{};
+        slau.global_M[i] = new double[slau.size]{};
+        slau.global_G[i] = new double[slau.size]{};
+    }
+
+    slau.global_d = new double[slau.size]{};   // Инициализируем размерность глобального вектора
+    slau.q = new double[slau.size]{};   // Инициализируем размерность вектора весов
+    slau.global_b = new double[slau.size]{};
 }
-
-
-
-double det_Jacobian(double* x, double* y, double* z, double ksi, double etta, double tetha)
-{
-    return prime_by_var(1, x, ksi, etta, tetha) * prime_by_var(2, y, ksi, etta, tetha) * prime_by_var(3, z, ksi, etta, tetha)
-        + prime_by_var(3, x, ksi, etta, tetha) * prime_by_var(1, y, ksi, etta, tetha) * prime_by_var(2, z, ksi, etta, tetha)
-        + prime_by_var(2, x, ksi, etta, tetha) * prime_by_var(3, y, ksi, etta, tetha) * prime_by_var(1, z, ksi, etta, tetha)
-        - prime_by_var(3, x, ksi, etta, tetha) * prime_by_var(2, y, ksi, etta, tetha) * prime_by_var(1, z, ksi, etta, tetha)
-        - prime_by_var(1, x, ksi, etta, tetha) * prime_by_var(3, y, ksi, etta, tetha) * prime_by_var(2, z, ksi, etta, tetha)
-        - prime_by_var(2, x, ksi, etta, tetha) * prime_by_var(1, y, ksi, etta, tetha) * prime_by_var(3, z, ksi, etta, tetha);
-}
-
-
-
-
-double Integrate(function<double(double, double, double, int, int, double*, double*, double*)> f, int i, int j, double* x, double* y, double* z)
-{
-   const int nKnot = 5; // Количество узлов Гаусса
-
-   double xj[nKnot] = { -sqrt(5. + 2. * (sqrt(10. / 7.))) / 3., -sqrt(5. - 2. * (sqrt(10. / 7.))) / 3.,	// Значения координат на узлах
-              0. , sqrt(5. - 2. * (sqrt(10. / 7.))) / 3. , sqrt(5. + 2. * (sqrt(10. / 7.))) / 3. };
-
-   double qj[nKnot] = { (322. - 13. * sqrt(70.)) / 900., (322. + 13. * sqrt(70.)) / 900., 128. / 225.,	// Веса узлов
-                  (322. + 13. * sqrt(70.)) / 900., (322. - 13. * sqrt(70.)) / 900. };
-   // Шаги
-   double hX = 1. / 2.,
-      hY = 1. / 2.,
-      hZ = 1. / 2.,
-      // Центры
-      cX = 1. / 2.,
-      cY = 1. / 2.,
-      cZ = 1. / 2.;
-
-   double result = 0.;
-   for (int ix = 0; ix < nKnot; ix++)
-      for (int iy = 0; iy < nKnot; iy++)
-         for (int iz = 0; iz < nKnot; iz++)
-            result += qj[ix] * qj[iy] * qj[iz] * (f(cX + xj[ix] * hX, cY + xj[iy] * hY, cZ + xj[iz] * hZ, i + 1, j + 1, x, y, z));
-   return 1. * 1. * 1. * result / 8.; // Масштабирование
-}
-
 

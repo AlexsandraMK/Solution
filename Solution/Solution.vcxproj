@@ -140,10 +140,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Formulas.cpp" />
+    <ClCompile Include="LocalSolution.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header.h" />
+    <ClInclude Include="LocalSolution.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="cross.txt" />
