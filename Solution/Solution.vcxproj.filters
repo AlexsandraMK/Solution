@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Исходные файлы\KE_IMPL">
+      <UniqueIdentifier>{27cba97f-1592-4b28-93e2-fa341a40b521}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Formulas.cpp">
@@ -24,6 +27,21 @@
     <ClCompile Include="LocalSolution.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="TriangularPrism.cpp">
+      <Filter>Исходные файлы\KE_IMPL</Filter>
+    </ClCompile>
+    <ClCompile Include="Hexagon.cpp">
+      <Filter>Исходные файлы\KE_IMPL</Filter>
+    </ClCompile>
+    <ClCompile Include="Triangle.cpp">
+      <Filter>Исходные файлы\KE_IMPL</Filter>
+    </ClCompile>
+    <ClCompile Include="vectorInteractions.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="IntegrationFunc.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header.h">
@@ -31,6 +49,9 @@
     </ClInclude>
     <ClInclude Include="LocalSolution.h">
       <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="IKE.h">
+      <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

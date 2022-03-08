@@ -109,39 +109,4 @@
 
 
 
-    vector<double> TriangularPrism::IKE::CalcLocalF(vector<Point>& knots)
-    {
-
-    }
-
-    void calc_local_M(LocalArea local, double** M) // ¬ычисление локальной матрицы массы
-    {
-        //double M_1[8][8] =
-        //{
-        //    {8, 4, 4, 2, 4, 2, 2, 1},
-        //    {4, 8, 2, 4, 2, 4, 1, 2},
-        //    {4, 2, 8, 4, 2, 1, 4, 2},
-        //    {2, 4, 4, 8, 1, 2, 2, 4},
-        //    {4, 2, 2, 1, 8, 4, 4, 2},
-        //    {2, 4, 1, 2, 4, 8, 2, 4},
-        //    {2, 1, 4, 2, 4, 2, 8, 4},
-        //    {1, 2, 2, 4, 2, 4, 4, 8}
-        //};
-
-        switch (local.size)
-        {
-        case (8):
-            for (int i = 0; i < 8; i++)
-                for (int j = 0; j < 8; j++)
-                    M[i][j] = Integrate(Mij, i, j, local.x, local.y, local.z);
-            break;
-        case (6):
-            break;
-        }
-
-
-    }
-
-
-
  
