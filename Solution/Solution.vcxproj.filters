@@ -24,9 +24,6 @@
     <ClCompile Include="Source.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="LocalSolution.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="TriangularPrism.cpp">
       <Filter>Исходные файлы\KE_IMPL</Filter>
     </ClCompile>
@@ -45,9 +42,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header.h">
-      <Filter>Исходные файлы</Filter>
-    </ClInclude>
-    <ClInclude Include="LocalSolution.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
     <ClInclude Include="IKE.h">

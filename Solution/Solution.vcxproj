@@ -142,7 +142,6 @@
     <ClCompile Include="Formulas.cpp" />
     <ClCompile Include="Hexagon.cpp" />
     <ClCompile Include="IntegrationFunc.cpp" />
-    <ClCompile Include="LocalSolution.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="Triangle.cpp" />
     <ClCompile Include="TriangularPrism.cpp" />
@@ -151,7 +150,6 @@
   <ItemGroup>
     <ClInclude Include="Header.h" />
     <ClInclude Include="IKE.h" />
-    <ClInclude Include="LocalSolution.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="cross.txt" />
