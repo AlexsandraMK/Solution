@@ -139,24 +139,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Formulas.cpp" />
     <ClCompile Include="Hexagon.cpp" />
+    <ClCompile Include="InitialData.cpp" />
+    <ClCompile Include="InputFuncs.cpp" />
     <ClCompile Include="IntegrationFunc.cpp" />
-    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="IntegrationFunc.h" />
+    <ClCompile Include="SLAU.cpp" />
+    <ClCompile Include="MAIN.cpp" />
+    <ClCompile Include="TimeScheme.cpp" />
     <ClCompile Include="Triangle.cpp" />
     <ClCompile Include="TriangularPrism.cpp" />
-    <ClCompile Include="vectorInteractions.cpp" />
+    <ClCompile Include="vectorInteractions.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Header.h" />
     <ClInclude Include="IKE.h" />
+    <ClInclude Include="InitialData.h" />
+    <ClInclude Include="InputFuncs.h" />
+    <ClInclude Include="Knot.h" />
+    <ClInclude Include="SLAU.h" />
+    <ClInclude Include="TimeScheme.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="cross.txt" />
-    <Text Include="EdgeBoundary_1.txt" />
     <Text Include="grid_time.txt" />
-    <Text Include="LocalArea.txt" />
-    <Text Include="Shestigran.txt" />
+    <Text Include="Result.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

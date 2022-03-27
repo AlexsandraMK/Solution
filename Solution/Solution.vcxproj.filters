@@ -16,14 +16,17 @@
     <Filter Include="Исходные файлы\KE_IMPL">
       <UniqueIdentifier>{27cba97f-1592-4b28-93e2-fa341a40b521}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Исходные файлы\TIME_IMPL">
+      <UniqueIdentifier>{a1c77060-a454-4182-93ab-0ce5585f170b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\SLAU_IMPL">
+      <UniqueIdentifier>{19c35ec8-bf18-4f59-9aff-dc664be3d9a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Дополнительный функции">
+      <UniqueIdentifier>{56b295e3-b59b-417f-91c0-72721f6e359e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Formulas.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="Source.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="TriangularPrism.cpp">
       <Filter>Исходные файлы\KE_IMPL</Filter>
     </ClCompile>
@@ -33,35 +36,56 @@
     <ClCompile Include="Triangle.cpp">
       <Filter>Исходные файлы\KE_IMPL</Filter>
     </ClCompile>
-    <ClCompile Include="vectorInteractions.cpp">
+    <ClCompile Include="MAIN.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="TimeScheme.cpp">
+      <Filter>Исходные файлы\TIME_IMPL</Filter>
+    </ClCompile>
+    <ClCompile Include="SLAU.cpp">
+      <Filter>Исходные файлы\SLAU_IMPL</Filter>
+    </ClCompile>
+    <ClCompile Include="vectorInteractions.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClCompile>
+    <ClCompile Include="IntegrationFunc.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClCompile>
     <ClCompile Include="IntegrationFunc.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Исходные файлы\Дополнительный функции</Filter>
+    </ClCompile>
+    <ClCompile Include="InitialData.cpp">
+      <Filter>Исходные файлы\Дополнительный функции</Filter>
+    </ClCompile>
+    <ClCompile Include="InputFuncs.cpp">
+      <Filter>Исходные файлы\Дополнительный функции</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Header.h">
-      <Filter>Исходные файлы</Filter>
-    </ClInclude>
     <ClInclude Include="IKE.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="SLAU.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeScheme.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="InitialData.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="InputFuncs.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Knot.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="cross.txt">
-      <Filter>Файлы ресурсов</Filter>
-    </Text>
-    <Text Include="EdgeBoundary_1.txt">
-      <Filter>Файлы ресурсов</Filter>
-    </Text>
     <Text Include="grid_time.txt">
       <Filter>Файлы ресурсов</Filter>
     </Text>
-    <Text Include="LocalArea.txt">
-      <Filter>Файлы ресурсов</Filter>
-    </Text>
-    <Text Include="Shestigran.txt">
+    <Text Include="Result.txt">
       <Filter>Файлы ресурсов</Filter>
     </Text>
   </ItemGroup>

@@ -1,21 +1,20 @@
 #pragma once
-#include "vectorInteractions.cpp"
-#include "IntegrationFunc.cpp"
+#include "vectorInteractions.h"
+#include "IntegrationFunc.h"
+#include "Knot.h"
 #include <string>
 using namespace std;
 
-struct Point // Координаты узлов
-{
-	double x, y, z;
-};
+
 
 class IKE
 {
 public:
 	vector<int> globalNumsKnots;
 	double lambda, sigma, hi;
+	
 
-	void SetGlobalKnotNum(int numKnot, Point coordinatesKnot)
+	void SetGlobalKnotNum(int numKnot, Knot coordinatesKnot)
 	{
 		globalNumsKnots[iterKnots] = numKnot;
 		knots[iterKnots] = coordinatesKnot;
@@ -34,14 +33,23 @@ public:
 
 	vector<double> CalcLocalF(vector<double> fInPoints)
 	{
+		vector<double> f;
+		f.resize(COUNT_KNOTS);
 		vector<vector<double>> M = CalcLocalM();
-		MultMatrByVect(M, fInPoints);
+		f = MultMatrByVect(M, fInPoints);
+
+		return f;
 	};
+
+	/// <summary>
+	/// Количество необходимых узлов
+	/// </summary>
+	virtual int GetCountKnots() = 0;
 
 protected:
 	int COUNT_KNOTS;
-	vector<Point> knots;
-	int iterKnots;
+	vector<Knot> knots;
+	int iterKnots = 0;
 };
 
 class Triangle : public IKE
@@ -54,9 +62,14 @@ private:
 
 public:
 	Triangle();
-
+	int GetCountKnots();
 	vector<vector<double>> CalcLocalG();
 	vector<vector<double>> CalcLocalM();
+
+	static string ToString()
+	{
+		return "Triangle";
+	}
 };
 
 class TriangularPrism : public IKE
@@ -75,8 +88,13 @@ private:
 
 public:
 	TriangularPrism();
+	int GetCountKnots();
 	vector<vector<double>> CalcLocalG();
 	vector<vector<double>> CalcLocalM();
+	static string ToString()
+	{
+		return "TriangularPrism";
+	}
 };
 
 class Hexagon : public IKE
@@ -93,7 +111,7 @@ private:
 	double CalcPhi(int ind, vector<double> integrationVar);
 
 	double DifferentiationPhi(int ind, NewAxis axis, vector<double> integrationVar);
-	
+
 	function<double(vector<double> integrationVar, int, int)> Mij = [this](vector<double> integrationVar, int i, int j)
 	{
 		double detJacobian = CalcDetMatrix(CalcJacobian(integrationVar));
@@ -108,12 +126,10 @@ private:
 		vector<vector<double>> Jacobian = CalcJacobian(integrationVar);
 		int sizeJacobian = Jacobian.size();
 		reversed_Jacobian.resize(sizeJacobian);
-
+		for (int i = 0; i < sizeJacobian; i++)	reversed_Jacobian[i].resize(sizeJacobian);
 
 		for (int i = 0; i < sizeJacobian; i++)
 		{
-			reversed_Jacobian[i].resize(sizeJacobian);
-
 			for (int j = 0; j < sizeJacobian; j++)
 			{
 				double min[4]{};
@@ -136,7 +152,7 @@ private:
 		double detJacobian = CalcDetMatrix(Jacobian);
 
 		vector<double> J_grad_i = MultMatrByVect(reversed_Jacobian, CalcGrad(i, integrationVar));
-		
+
 		vector<double> J_grad_j = MultMatrByVect(reversed_Jacobian, CalcGrad(j, integrationVar));
 
 		return CalcScalar(J_grad_i, J_grad_j) * detJacobian;
@@ -147,9 +163,15 @@ private:
 	vector<double> CalcGrad(int ind, vector<double> integrationVar);
 
 public:
+	int GetCountKnots();
 	Hexagon();
 	vector<vector<double>> CalcLocalG();
 	vector<vector<double>> CalcLocalM();
+
+	static string ToString()
+	{
+		return "Hexagon";
+	}
 };
 
 

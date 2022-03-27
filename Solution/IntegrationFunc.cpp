@@ -1,7 +1,4 @@
-#include <functional>
-#include <vector>
-
-
+#include "IntegrationFunc.h"
 
 double Integrate(std::function<double(double, double, double, int, int, double*, double*, double*)> f, int i, int j, double* x, double* y, double* z)
 {
@@ -29,12 +26,6 @@ double Integrate(std::function<double(double, double, double, int, int, double*,
     return 1. * 1. * 1. * result / 8.; // Масштабирование
 }
 
-enum NewAxis {
-    ksi = 0,
-    etta,
-    theta
-};
-
 double Integrate(std::function<double(std::vector<double> integrationVar, int i, int j)> func, int i, int j)
 {
     const int countGaussKnot = 5; // Количество узлов Гаусса
@@ -61,6 +52,6 @@ double Integrate(std::function<double(std::vector<double> integrationVar, int i,
                 integrationVar = { axisCenters[ksi] + xj[ix] * axisSteps[ksi], axisCenters[etta] + xj[iy] * axisSteps[etta], axisCenters[theta] + xj[iz] * axisSteps[theta] };
                 result += qj[ix] * qj[iy] * qj[iz] * (func(integrationVar, i, j));
             }
-        
+
     return result / 8.; // Масштабирование
 }

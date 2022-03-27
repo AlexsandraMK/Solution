@@ -5,8 +5,14 @@
 Hexagon::Hexagon()
 {
     globalNumsKnots.resize(COUNT_KNOTS);
+    knots.resize(COUNT_KNOTS);
     lambda = sigma = hi = 0;
     iterKnots = 0;
+}
+
+int Hexagon::GetCountKnots()
+{
+    return COUNT_KNOTS;
 }
 
 vector<vector<double>> Hexagon::CalcLocalM()
@@ -14,9 +20,13 @@ vector<vector<double>> Hexagon::CalcLocalM()
     vector<vector<double>> M;
     M.resize(COUNT_KNOTS);
 
-    for (int i = 0; i < 8; i++)
-        for (int j = 0; j < 8; j++)
+    for (int i = 0; i < COUNT_KNOTS; i++)
+    {
+        M[i].resize(COUNT_KNOTS);
+        for (int j = 0; j < COUNT_KNOTS; j++)
             M[i][j] = Integrate(Mij, i, j);
+    }
+        
 
     return M;
 }
@@ -26,19 +36,23 @@ vector<vector<double>> Hexagon::CalcLocalG()
     vector<vector<double>> G;
     G.resize(COUNT_KNOTS);
 
-    for (int i = 0; i < 8; i++)
-        for (int j = 0; j < 8; j++)
+    for (int i = 0; i < COUNT_KNOTS; i++)
+    {
+        G[i].resize(COUNT_KNOTS);
+        for (int j = 0; j < COUNT_KNOTS; j++)
             G[i][j] = Integrate(Gij, i, j);
+    }
+
 
     return G;
 }
 
 
-int Hexagon::CalcMu(int ind)    {   return ((ind - 1) % 2) + 1;   }
+int Hexagon::CalcMu(int ind)    {   return (ind % 2) + 1;   }
 
-int Hexagon::CalcNu(int ind)    {   return ((ind - 1) / 2) % 2 + 1;   }
+int Hexagon::CalcNu(int ind)    {   return (ind / 2) % 2 + 1;   }
 
-int Hexagon::CalcZeta(int ind) {   return (ind - 1) / 4 + 1;   }
+int Hexagon::CalcZeta(int ind) {   return ind / 4 + 1;   }
 
 double Hexagon::CalcW(int ind, double alpha)
 {
@@ -102,9 +116,9 @@ vector<vector<double>> Hexagon::CalcJacobian(vector<double> integrationVars)
         x[i] = knots[i].x;
         y[i] = knots[i].y;
         z[i] = knots[i].z;
-        diffPhiByKsi[i] = DifferentiationPhi(i + 1, ksi, integrationVars);
-        diffPhiByEtta[i] = DifferentiationPhi(i + 1, etta, integrationVars);
-        diffPhiByTheta[i] = DifferentiationPhi(i + 1, theta, integrationVars);
+        diffPhiByKsi[i] = DifferentiationPhi(i, ksi, integrationVars);
+        diffPhiByEtta[i] = DifferentiationPhi(i, etta, integrationVars);
+        diffPhiByTheta[i] = DifferentiationPhi(i, theta, integrationVars);
     }
 
     vector<vector<double>> Jacobian =
@@ -122,6 +136,8 @@ vector<double> Hexagon::CalcGrad(int ind, vector<double> integrationVars)
     vector<double> grad = { DifferentiationPhi(ind,ksi, integrationVars),
                             DifferentiationPhi(ind,etta, integrationVars),
                             DifferentiationPhi(ind,theta, integrationVars) };
+
+    return grad;
 }
 
 

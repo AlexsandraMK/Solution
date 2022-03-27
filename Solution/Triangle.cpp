@@ -3,8 +3,14 @@
 Triangle::Triangle()
 {
 	globalNumsKnots.resize(COUNT_KNOTS);
+	knots.resize(COUNT_KNOTS);
 	lambda = sigma = hi = 0;
 	iterKnots = 0;
+}
+
+int Triangle::GetCountKnots()
+{
+	return COUNT_KNOTS;
 }
 
 double Triangle::CalcDetD()
@@ -15,9 +21,9 @@ double Triangle::CalcDetD()
 
 vector<vector<double>> Triangle::CalcAlfaMatrix()
 {
-	Point top1 = knots[0];
-	Point top2 = knots[1];
-	Point top3 = knots[2];
+	Knot top1 = knots[0];
+	Knot top2 = knots[1];
+	Knot top3 = knots[2];
 	double detD = CalcDetD();
 	vector<vector<double>> alfaMatrix =
 	{
@@ -32,7 +38,7 @@ vector<vector<double>> Triangle::CalcAlfaMatrix()
 double Triangle::CalcArea()
 {
     double detD = CalcDetD();
-    return 1 / 2 * abs(detD);
+    return 1. / 2. * abs(detD);
 }
 
 vector<vector<double>> Triangle::CalcLocalG()
@@ -58,14 +64,14 @@ vector<vector<double>> Triangle::CalcLocalG()
 vector<vector<double>> Triangle::CalcLocalM()
 {
 	double area = CalcArea();
-	double mult = area / 12;
+	double mult = area / 12.;
 
 
 	vector<vector<double>> M =
 	{
-		{mult * 2, mult * 1, mult * 1},
-		{mult * 1, mult * 2, mult * 1},
-		{mult * 1, mult * 1, mult * 2}
+		{mult * 2., mult * 1., mult * 1.},
+		{mult * 1., mult * 2., mult * 1.},
+		{mult * 1., mult * 1., mult * 2.}
 	};
 
 	return M;

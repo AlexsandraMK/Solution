@@ -3,19 +3,25 @@
 	TriangularPrism::TriangularPrism()
 	{
 		globalNumsKnots.resize(COUNT_KNOTS);
+        knots.resize(COUNT_KNOTS);
 		lambda = sigma = hi = 0;
 		iterKnots = 0;
 	}
 
+    int TriangularPrism::GetCountKnots()
+    {
+        return COUNT_KNOTS;
+    }
+
     vector<vector<double>> TriangularPrism::CalcMz()
     {
         double hz = knots[COUNT_KNOTS - 1].z - knots[0].z;
-        double mult = hz / 6;
+        double mult = hz / 6.;
 
         vector<vector<double>> Mz = 
         {
-            {mult * 2, mult * 1},
-            {mult * 1, mult * 2},
+            {mult * 2., mult * 1.},
+            {mult * 1., mult * 2.},
         };
       
         return Mz;
@@ -24,19 +30,19 @@
     vector<vector<double>> TriangularPrism::CalcGz()
     {
         double hz = knots[COUNT_KNOTS - 1].z - knots[0].z;
-        double mult = 1 / hz;
+        double mult = 1. / hz;
 
         vector<vector<double>> Gz =
         {
-            {mult * 1, mult * (-1)},
-            {mult * (-1), mult * 1},
+            {mult * 1., mult * (-1.)},
+            {mult * (-1.), mult * 1.},
         };
 
         return Gz;
     }
 
-    int TriangularPrism::CalcMu(int ind) { return (ind - 1) % 3; }
-    int TriangularPrism::CalcNu(int ind) { return (ind - 1) / 3; }
+    int TriangularPrism::CalcMu(int ind) { return ind % 3; }
+    int TriangularPrism::CalcNu(int ind) { return ind / 3; }
 
     Triangle TriangularPrism::CreateBase()
     {
@@ -74,6 +80,8 @@
                 M[i][j] = Mxy[muI][muJ] * Mz[nuI][nuJ];
             }
         }
+
+        return M;
     }
 
     vector<vector<double>> TriangularPrism::CalcLocalG()
@@ -103,6 +111,8 @@
                 G[i][j] = Gxy[muI][muJ] * Mz[nuI][nuJ] + Mxy[muI][muJ] * Gz[nuI][nuJ];
             }
         }
+
+        return G;
     }
 
 
