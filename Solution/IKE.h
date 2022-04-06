@@ -46,6 +46,8 @@ public:
 	/// </summary>
 	virtual int GetCountKnots() = 0;
 
+	virtual double SolveInPoint(Knot knot, vector<double> q) = 0;
+
 protected:
 	int COUNT_KNOTS;
 	vector<Knot> knots;
@@ -66,6 +68,10 @@ public:
 	vector<vector<double>> CalcLocalG();
 	vector<vector<double>> CalcLocalM();
 
+	double CountBasis(int ind, double x, double y);
+
+	double SolveInPoint(Knot knot, vector<double> q);
+
 	static string ToString()
 	{
 		return "Triangle";
@@ -79,17 +85,18 @@ private:
 	int COUNT_KNOTS = 6;
 	int CalcMu(int ind);
 	int CalcNu(int ind);
-
-	Triangle CreateBase();
+	Triangle* base;
 
 	vector<vector<double>> CalcMz();
 
 	vector<vector<double>> CalcGz();
 
 public:
+	void CreateBase();
 	TriangularPrism();
 	int GetCountKnots();
 	vector<vector<double>> CalcLocalG();
+	double SolveInPoint(Knot knot, vector<double> q);
 	vector<vector<double>> CalcLocalM();
 	static string ToString()
 	{
@@ -155,12 +162,14 @@ private:
 
 		vector<double> J_grad_j = MultMatrByVect(reversed_Jacobian, CalcGrad(j, integrationVar));
 
-		return CalcScalar(J_grad_i, J_grad_j) * detJacobian;
+		return CalcScalar(J_grad_i, J_grad_j) / detJacobian; // Исправлено
 	};
 
 	vector<vector<double>> CalcJacobian(vector<double> integrationVar);
 
 	vector<double> CalcGrad(int ind, vector<double> integrationVar);
+
+	double SolveInPoint(Knot knot, vector<double> q);
 
 public:
 	int GetCountKnots();

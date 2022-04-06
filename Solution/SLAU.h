@@ -6,7 +6,8 @@ class SLAU
 public:
 	void SolveSLAU(InitialData* data, TimeScheme* scheme);
 	SLAU(InitialData* data);
-	void WriteResult(vector<double> q, double time);
+	void WriteResultForSolution(vector<double> q, double time);
+	void WriteResultForTest(vector<double> q, double time);
 	vector<vector<double>> A;
 	vector<vector<double>> M;
 	vector<vector<double>> G;

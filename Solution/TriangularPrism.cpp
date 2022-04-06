@@ -6,6 +6,8 @@
         knots.resize(COUNT_KNOTS);
 		lambda = sigma = hi = 0;
 		iterKnots = 0;
+
+        base = NULL;
 	}
 
     int TriangularPrism::GetCountKnots()
@@ -44,22 +46,20 @@
     int TriangularPrism::CalcMu(int ind) { return ind % 3; }
     int TriangularPrism::CalcNu(int ind) { return ind / 3; }
 
-    Triangle TriangularPrism::CreateBase()
+    void TriangularPrism::CreateBase()
     {
-        Triangle base;
+        base = new Triangle();
         int baseCountKnots = COUNT_KNOTS / 2;
 
         for (int i = 0; i < baseCountKnots; i++)
-            base.SetGlobalKnotNum(globalNumsKnots[i], knots[i]);
-
-        return base;
+            base->SetGlobalKnotNum(globalNumsKnots[i], knots[i]);
     }
 
     vector<vector<double>> TriangularPrism::CalcLocalM()
     {
-        Triangle base = CreateBase();
+        if (base == NULL) CreateBase();
 
-        vector<vector<double>> Mxy = base.CalcLocalM();
+        vector<vector<double>> Mxy = base->CalcLocalM();
 
         vector<vector<double>> Mz = CalcMz();
 
@@ -86,10 +86,9 @@
 
     vector<vector<double>> TriangularPrism::CalcLocalG()
     {
-        Triangle base = CreateBase();
-
-        vector<vector<double>> Mxy = base.CalcLocalM();
-        vector<vector<double>> Gxy = base.CalcLocalG();
+        if (base == NULL) CreateBase();
+        vector<vector<double>> Mxy = base->CalcLocalM();
+        vector<vector<double>> Gxy = base->CalcLocalG();
 
         vector<vector<double>> Mz = CalcMz();
         vector<vector<double>> Gz = CalcGz();
@@ -115,6 +114,27 @@
         return G;
     }
 
+
+    double TriangularPrism::SolveInPoint(Knot knot, vector<double> q)
+    {
+        double basesBase[] = { base->CountBasis(0,knot.x, knot.y),
+                               base->CountBasis(1,knot.x, knot.y),
+                               base->CountBasis(2,knot.x, knot.y) };
+
+        double hz = knots[COUNT_KNOTS - 1].z - knots[0].z;
+
+        double basesZ[] = { (knots[COUNT_KNOTS-1].z - knot.z) / hz,
+                            (knot.z - knots[0].z) / hz };
+
+        double u =  q[globalNumsKnots[0]] * basesBase[0] * basesZ[0] +
+                    q[globalNumsKnots[1]] * basesBase[1] * basesZ[0] + 
+                    q[globalNumsKnots[2]] * basesBase[2] * basesZ[0] + 
+                    q[globalNumsKnots[3]] * basesBase[0] * basesZ[1] +
+                    q[globalNumsKnots[4]] * basesBase[1] * basesZ[1] +
+                    q[globalNumsKnots[5]] * basesBase[2] * basesZ[1];
+
+        return u;
+    }
 
 
 

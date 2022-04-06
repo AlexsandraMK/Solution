@@ -15,9 +15,9 @@ double GetF(Knot coord, double time)
     //return 2. + 2. * time; // Зависит от времени квадратично
     //return 6 * time + 3. * time * time; // Зависит от времени кубически
     //return 12. * time * time + 4. * time * time * time; // Должна давать погрешность
-    //return 2. /*+ coord.x * coord.x*/;
+    return 2. /*+ coord.x * coord.x*/;
     //return 6. * coord.x;
-    //return 12. * coord.x * coord.x;
+    return 12. * coord.x * coord.x;
     //return 30. * coord.x * coord.x * coord.x * coord.x;
 
     return 0;
@@ -39,9 +39,9 @@ double GetU(Knot coord, double time)
     //return time * time; // Зависит от времени квадратично
     //return time * time * time; // Зависит от времени кубически
     //return time * time * time * time; // Должна давать погрешность
-    //return coord.x * coord.x;
+    return coord.x * coord.x;
     //return coord.x * coord.x* coord.x;
-    //return coord.x * coord.x * coord.x * coord.x;
+    return coord.x * coord.x * coord.x * coord.x;
     //return coord.x * coord.x * coord.x * coord.x * coord.x * coord.x;
     if (time == 4 && 
         coord.x == 0.857143 &&

@@ -20,7 +20,9 @@ SLAU::SLAU(InitialData* data)
     d.resize(slauSize);
 
     M = AssemblingGlobalM(data);
+    //WriteMatrix(M);
     G = AssemblingGlobalG(data);
+    //WriteMatrix(G);
 }
 
 void SLAU::LOC()
@@ -36,7 +38,8 @@ void SLAU::LOC()
     f.resize(slauSize);
 
     double lastnvzk;
-
+    for (i = 0; i < slauSize; i++)
+        q[i] = 0.;
     f = MultMatrByVect(A, q);
 
     for (i = 0; i < slauSize; i++)
@@ -171,6 +174,11 @@ void SLAU::CalcA(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
 
         }
     }
+
+    cout << endl;
+    for (int i = 0; i < A.size(); i++)
+        cout << A[13][i] << "\t";
+    cout << endl;
 }
 
 void SLAU::CalcD(InitialData* data, TimeScheme* scheme) // Вычисление глобальной A
@@ -202,7 +210,7 @@ void SLAU::CalcD(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
                                                 ((timeToCalc[1] - timeToCalc[0]) * (timeToCalc[1] - timeToCalc[2]) * (timeToCalc[1] - timeToCalc[3]))
                 - /*ke->sigma*/0 * Mq_j1[globalJ] * ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1])) /
                                                 ((timeToCalc[2] - timeToCalc[0]) * (timeToCalc[2] - timeToCalc[1]) * (timeToCalc[2] - timeToCalc[3]))
-              - ke->hi * Mq_j3[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[2])) /
+                - ke->hi * Mq_j3[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[2])) /
                                                 ((timeToCalc[0] - timeToCalc[3]) * (timeToCalc[0] - timeToCalc[1]) * (timeToCalc[0] - timeToCalc[2]))
                 - ke->hi * Mq_j2[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[0]) + (timeToCalc[3] - timeToCalc[2])) /
                                                 ((timeToCalc[1] - timeToCalc[0]) * (timeToCalc[1] - timeToCalc[2]) * (timeToCalc[1] - timeToCalc[3]))
@@ -210,6 +218,8 @@ void SLAU::CalcD(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
                                                 ((timeToCalc[2] - timeToCalc[0]) * (timeToCalc[2] - timeToCalc[1]) * (timeToCalc[2] - timeToCalc[3]));
         }
     }
+
+    cout << d[13] << endl;
 }
 
 vector<double> SLAU::AssemblingGlobalF(InitialData* data, double time)
@@ -251,8 +261,16 @@ void SLAU::CalcFirstBoundaryConditions(InitialData* data, double time)
             //{
             //    A[global_num_coord][k] = 0;
             //}
+
+            //A[global_num_coord][global_num_coord] = 1.;
+            //d[global_num_coord] = u[global_num_coord];
+            ////d[global_num_coord] = 0.;     // Для решения
+
+
+            // БОЛШИМ ЧИСЛОМ
             A[global_num_coord][global_num_coord] = 10e+14;
-            d[global_num_coord] = 0.* 10e+14;
+            d[global_num_coord] = u[global_num_coord] * 10e+14;
+            //d[global_num_coord] = 0.* 10e+14;     // Для решения
         }
     }
 }
@@ -281,7 +299,7 @@ void SLAU::CalcU(InitialData* data, double time)
     }
 }
 
-void SLAU::WriteResult(vector<double> q, double time) //функция вывода в консоль
+void SLAU::WriteResultForSolution(vector<double> q, double time) //функция вывода в консоль
 {
     ofstream out("Result.txt", ios_base::out | ios_base::app);
 
@@ -329,6 +347,59 @@ void SLAU::WriteResult(vector<double> q, double time) //функция вывода в консоль
         //cout << u[i] << "| ";
         //cout.width(15);
         //cout << fabs(q[i] - u[i]) << "| ";
+        out << endl;
+    }
+}
+
+void SLAU::WriteResultForTest(vector<double> q, double time) //функция вывода в консоль
+{
+    ofstream out("ResultForTest.txt", ios_base::out | ios_base::app);
+    
+    out << endl << "ВРЕМЯ: " << time << endl;
+    out << endl << "Результат в узлах (веса):" << endl;
+    out << " ___________________________________________________________________________________________________ " << endl;
+
+    out.setf(ios::left);
+    out.width(15);
+    out << "| № элемента " << "  | ";
+    out.width(15);
+    out << "x" << "| ";
+    out.width(15);
+    out << "y" << "| ";
+    out.width(15);
+    out << "z" << "| ";
+    out.width(15);
+    out << "u*" << "| ";
+    out.width(15);
+    out << "u" << "| ";
+    out.width(15);
+    out << "|u-u*|" << "|";
+    out << endl;
+    out << "|----------------|----------------|";
+    out << "----------------|";
+    out << "----------------|----------------|";
+    out << "----------------|----------------|";
+    out << endl;
+
+    int slauSize = q.size();
+    for (int i = 0; i < slauSize; i++)
+    {
+        out.setf(ios::left);
+        out << "| ";
+        out.width(15);
+        out << i + 1 << "| ";
+        out.width(15);
+        out << knots[i].x << "| ";
+        out.width(15);
+        out << knots[i].y << "| ";
+        out.width(15);
+        out << knots[i].z << "| ";
+        out.width(15);
+        out << q[i] << "| ";
+        out.width(15);
+        out << u[i] << "| ";
+        out.width(15);
+        out << fabs(q[i] - u[i]) << "| ";
         out << endl;
     }
 }

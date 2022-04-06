@@ -88,5 +88,8 @@
     <Text Include="Result.txt">
       <Filter>Файлы ресурсов</Filter>
     </Text>
+    <Text Include="ResultForTest.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
   </ItemGroup>
 </Project>

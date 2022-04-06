@@ -12,7 +12,7 @@ InitialData::InitialData()
     ReadCoordinates("cross.txt");
 
     ReadKEs("TriangularPrism.txt");
-    ReadKEs("Hexagon.txt");
+    //ReadKEs("Hexagon.txt");
 
     ReadBounds("FirstBounds.txt");
 
@@ -78,7 +78,6 @@ void InitialData::ReadKEs(string pathFile) // Óחכû
         in >> ke->lambda;    // כÿלבהא
         in >> ke->sigma;     // דאללא
         in >> ke->hi;        // ץט
-
         KEs[iKE] = ke;
     }
     in.close();

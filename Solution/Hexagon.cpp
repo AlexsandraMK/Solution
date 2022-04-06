@@ -141,3 +141,9 @@ vector<double> Hexagon::CalcGrad(int ind, vector<double> integrationVars)
 }
 
 
+double Hexagon::SolveInPoint(Knot knot, vector<double> q)
+{
+
+}
+
+

@@ -76,3 +76,19 @@ vector<vector<double>> Triangle::CalcLocalM()
 
 	return M;
 }
+
+double Triangle::CountBasis(int ind, double x, double y)
+{
+	vector<vector<double>> alpha = CalcAlfaMatrix();
+
+	return alpha[ind][0] + alpha[ind][1] * x + alpha[ind][2] * y;
+}
+
+double Triangle::SolveInPoint(Knot knot, vector<double> q)
+{
+	double bases[] = {	CountBasis(0,knot.x, knot.y),
+						CountBasis(1,knot.x, knot.y),
+						CountBasis(2,knot.x, knot.y) };
+
+	return 0;
+}
