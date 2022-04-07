@@ -1,7 +1,4 @@
-﻿  InitialData.cpp
+﻿  MAIN.cpp
 D:\Progs\VisualSaves\Diplom\Solution\Solution\vectorInteractions.h(51,20): warning C4018: <: несоответствие типов со знаком и без знака
 D:\Progs\VisualSaves\Diplom\Solution\Solution\vectorInteractions.h(53,21): warning C4018: <: несоответствие типов со знаком и без знака
-D:\Progs\VisualSaves\Diplom\Solution\Solution\InitialData.cpp(58,36): warning C4018: <: несоответствие типов со знаком и без знака
-  InputFuncs.cpp
-  Создание кода...
   Solution.vcxproj -> D:\Progs\VisualSaves\Diplom\Solution\Debug\Solution.exe

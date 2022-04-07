@@ -58,6 +58,13 @@ vector<vector<double>> Triangle::CalcLocalG()
 		}
 	}
 
+	double sum = 0;
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+			sum += G[i][j];
+
+	if (sum != 0) cout << "Îøèáêà â Gxy" << globalNumsKnots[0] << "\t" << globalNumsKnots[1] << "\t" << globalNumsKnots[2];
+
 	return G;
 }
 

@@ -40,6 +40,13 @@
             {mult * (-1.), mult * 1.},
         };
 
+        double sum = 0;
+        for (int i = 0; i < 2; i++)
+            for (int j = 0; j < 2; j++)
+                sum += Gz[i][j];
+
+        if (sum != 0) cout << "Îøèáêà â Gz" << globalNumsKnots[0] << "\t" << globalNumsKnots[1] << "\t" << globalNumsKnots[2];
+
         return Gz;
     }
 
@@ -110,6 +117,13 @@
                 G[i][j] = Gxy[muI][muJ] * Mz[nuI][nuJ] + Mxy[muI][muJ] * Gz[nuI][nuJ];
             }
         }
+
+        double sum = 0;
+        for (int i = 0; i < COUNT_KNOTS; i++)
+            for (int j = 0; j < COUNT_KNOTS; j++)
+                sum += G[i][j];
+
+        if (sum > 1e-14) cout << "Îøèáêà â G" << globalNumsKnots[0] << "\t" << globalNumsKnots[1] << "\t" << globalNumsKnots[2];
 
         return G;
     }
