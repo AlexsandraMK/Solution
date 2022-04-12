@@ -19,6 +19,12 @@ double Triangle::CalcDetD()
 	return detD;
 }
 
+double Triangle::CalcDetD(Knot knotsTriangle[3])
+{
+	double detD = (knotsTriangle[1].x - knotsTriangle[0].x) * (knotsTriangle[2].y - knotsTriangle[0].y) - (knotsTriangle[2].x - knotsTriangle[0].x) * (knotsTriangle[1].y - knotsTriangle[0].y);
+	return detD;
+}
+
 vector<vector<double>> Triangle::CalcAlfaMatrix()
 {
 	Knot top1 = knots[0];
@@ -63,7 +69,8 @@ vector<vector<double>> Triangle::CalcLocalG()
 		for (int j = 0; j < 3; j++)
 			sum += G[i][j];
 
-	if (sum != 0) cout << "Îøèáêà â Gxy" << globalNumsKnots[0] << "\t" << globalNumsKnots[1] << "\t" << globalNumsKnots[2];
+	if (sum != 0) 
+		cout << "Îøèáêà â Gxy" << globalNumsKnots[0] << "\t" << globalNumsKnots[1] << "\t" << globalNumsKnots[2];
 
 	return G;
 }
@@ -98,4 +105,20 @@ double Triangle::SolveInPoint(Knot knot, vector<double> q)
 						CountBasis(2,knot.x, knot.y) };
 
 	return 0;
+}
+
+bool Triangle::IsIn(Knot knot)
+{
+	double sum = 0;
+	for (int i = 0; i < COUNT_KNOTS; i++)
+	{
+		Knot* knotsTriangle = new Knot[3]{	knots[i % COUNT_KNOTS],
+											knots[(i + 1) % COUNT_KNOTS],
+											knot };
+		sum += abs(CalcDetD(knotsTriangle));
+	}
+
+	if (CalcArea() == sum/2) return true;
+
+	return false;
 }

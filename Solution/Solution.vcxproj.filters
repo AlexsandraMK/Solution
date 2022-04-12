@@ -60,6 +60,9 @@
     <ClCompile Include="InputFuncs.cpp">
       <Filter>Исходные файлы\Дополнительный функции</Filter>
     </ClCompile>
+    <ClCompile Include="GaussSolverSLAE.cpp">
+      <Filter>Исходные файлы\SLAU_IMPL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IKE.h">
@@ -80,6 +83,9 @@
     <ClInclude Include="Knot.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="SolverSLAE.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="grid_time.txt">
@@ -89,6 +95,9 @@
       <Filter>Файлы ресурсов</Filter>
     </Text>
     <Text Include="ResultForTest.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
+    <Text Include="ResultArea.txt">
       <Filter>Файлы ресурсов</Filter>
     </Text>
   </ItemGroup>

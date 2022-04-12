@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include "InputFuncs.h"
+#include <set>
 
 
 SLAU::SLAU(InitialData* data)
@@ -165,7 +166,7 @@ void SLAU::CalcA(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
                 //    ke->hi * M[globalJ][globalK] *
                 //    2 * ((timeToCalc[3] - timeToCalc[2]) + (timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[0]))
                 //    / ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) +
-                //    /*ke->sigma*/0 * M[globalJ][globalK]
+                //    ke->sigma/*0*/ * M[globalJ][globalK]
                 //    * ((timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])
                 //    +  (timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[2])
                 //    +  (timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]))
@@ -205,11 +206,11 @@ void SLAU::CalcD(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
             int globalJ = ke->globalNumsKnots[j];
             d[globalJ] = b[globalJ];
             //d[globalJ] = b[globalJ]
-            //    - /*ke->sigma*/0 * Mq_j3[globalJ] * ((timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) /
+            //    - ke->sigma/*0*/ * Mq_j3[globalJ] * ((timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) /
             //                                    ((timeToCalc[0] - timeToCalc[1]) * (timeToCalc[0] - timeToCalc[2]) * (timeToCalc[0] - timeToCalc[3]))
-            //    - /*ke->sigma*/0 * Mq_j2[globalJ] * ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[2])) /
+            //    - ke->sigma/*0*/ * Mq_j2[globalJ] * ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[2])) /
             //                                    ((timeToCalc[1] - timeToCalc[0]) * (timeToCalc[1] - timeToCalc[2]) * (timeToCalc[1] - timeToCalc[3]))
-            //    - /*ke->sigma*/0 * Mq_j1[globalJ] * ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1])) /
+            //    - ke->sigma/*0*/ * Mq_j1[globalJ] * ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1])) /
             //                                    ((timeToCalc[2] - timeToCalc[0]) * (timeToCalc[2] - timeToCalc[1]) * (timeToCalc[2] - timeToCalc[3]))
             //    - ke->hi * Mq_j3[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[2])) /
             //                                    ((timeToCalc[0] - timeToCalc[3]) * (timeToCalc[0] - timeToCalc[1]) * (timeToCalc[0] - timeToCalc[2]))
@@ -403,6 +404,89 @@ void SLAU::WriteResultForTest(vector<double> q, double time) //функция вывода в 
         out << fabs(q[i] - u[i]) << "| ";
         out << endl;
     }
+}
+
+
+void SLAU::SolveInArea( InitialData* data, double time) //функция вывода в консоль
+{
+    set<double> x, y, z;
+
+    for (int i = 0; i < knots.size(); i++)
+    {
+        x.insert(knots[i].x);
+        y.insert(knots[i].y);
+        z.insert(knots[i].z);
+    }
+
+    vector<Knot*> areaKnots;
+    for (set<double> ::iterator ix = x.begin(); ix != x.end(); ix++)
+    {
+        for (set<double> ::iterator iy = y.begin(); iy != y.end(); iy++)
+        {
+            for (set<double> ::iterator iz = z.begin(); iz != z.end(); iz++)
+            {
+                Knot* knot = new Knot(*ix, *iy, *iz);
+                areaKnots.push_back(knot);
+            }
+        }
+    }
+
+    ofstream out("ResultArea.txt", ios_base::out | ios_base::app);
+
+    out << endl << "ВРЕМЯ: " << time << endl;
+    out << endl << "Результат в узлах (веса):" << endl;
+    out << " _____________________________________________________________________________________ " << endl;
+
+    out.setf(ios::left);
+    out.width(15);
+    out << "| № элемента " << "  | ";
+    out.width(15);
+    out << "x" << "| ";
+    out.width(15);
+    out << "y" << "| ";
+    out.width(15);
+    out << "z" << "| ";
+    out.width(15);
+    out << "u*" << "| ";
+    out.width(15);
+    out << endl;
+    out << "|----------------|";
+    out << "----------------|----------------|----------------|";
+    out << "----------------|";
+    out << endl;
+
+    for (int i = 0; i < areaKnots.size(); i++)
+    {
+        out.setf(ios::left);
+        out << "| ";
+        out.width(15);
+        out << i + 1 << "| ";
+        out.width(15);
+        out << knots[i].x << "| ";
+        out.width(15);
+        out << knots[i].y << "| ";
+        out.width(15);
+        out << knots[i].z << "| ";
+        out.width(15);
+        out << SolveInPoint(data, knots[i]) << "| ";
+        out << endl;
+    }
+
+}
+
+double SLAU::SolveInPoint(InitialData* data, Knot knot) 
+{
+    int iKe = 0;
+    for (; iKe < data->KEs.size(); iKe++)
+    {
+        if (data->KEs[iKe]->IsIn(knot))
+        {
+            return data->KEs[iKe]->SolveInPoint(knot, q);
+        }
+    }
+
+    cout << "Точка - " << knot.x << " " << knot.y << " " << knot.z << " - находится вне расчетной области";
+    return 0;
 }
 
 

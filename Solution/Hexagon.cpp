@@ -1,4 +1,5 @@
 #include "IKE.h"
+#include "SolverSLAE.h"
 
 
 
@@ -70,26 +71,26 @@ double Hexagon::CalcPhi(int ind, vector<double> integrationVar)
 
 double Hexagon::DifferentiationPhi(int ind, NewAxis axis, vector<double> integrationVars)
 {
-    double diffPhi = CalcPhi(ind, integrationVars);
+    double diffPhi = 0;
     int indW = 0;
 
     switch (axis)
     {
     case ksi:
         indW = CalcMu(ind);
-        diffPhi /= CalcW(indW, integrationVars[ksi]);
+        diffPhi = CalcW(CalcNu(ind), integrationVars[etta]) * CalcW(CalcZeta(ind), integrationVars[theta]);
         break;
     case etta:
         indW = CalcNu(ind);
-        diffPhi /= CalcW(indW, integrationVars[etta]);
+        diffPhi = CalcW(CalcMu(ind), integrationVars[ksi])  * CalcW(CalcZeta(ind), integrationVars[theta]);
         break;
     case theta:
         indW = CalcZeta(ind);
-        diffPhi /= CalcW(indW, integrationVars[theta]);
+        diffPhi = CalcW(CalcMu(ind), integrationVars[ksi]) * CalcW(CalcNu(ind), integrationVars[etta]);
         break;
     }
 
-    diffPhi *= indW == 1 ? -1 : 1;
+    diffPhi *= indW == 1 ? -1. : 1.;
 
     return diffPhi;
 }
@@ -143,7 +144,104 @@ vector<double> Hexagon::CalcGrad(int ind, vector<double> integrationVars)
 
 double Hexagon::SolveInPoint(Knot knot, vector<double> q)
 {
-    return 0;
+    vector<double> integrationVar = {0.5,0.5,0.5};
+
+
+    double eps = 1e-16;
+    double nkvz = 1e-15;
+    
+    while (nkvz >= eps)
+    {
+        
+        vector<vector<double>> Jacobian = CalcJacobian(integrationVar);
+
+        double temp;
+        for(int i = 0; i < Jacobian.size(); i++)
+            for (int j = i; j < Jacobian.size(); j++)
+            {
+                temp = Jacobian[i][j];
+                Jacobian[i][j] = Jacobian[j][i];
+                Jacobian[j][i] = temp;
+            }
+
+        vector<double> F;
+        F.resize(Jacobian.size(),0);
+
+        for (int i = 0; i < COUNT_KNOTS; i++)
+        {
+            F[0] -= knots[i].x * CalcPhi(i, integrationVar);
+            F[1] -= knots[i].y * CalcPhi(i, integrationVar);
+            F[2] -= knots[i].z * CalcPhi(i, integrationVar);
+        }
+
+        F[0] += knot.x;
+        F[1] += knot.y;
+        F[2] += knot.z;
+
+        GaussSolverSLAE* solver = new GaussSolverSLAE(Jacobian, F);
+        solver->Solve();
+
+        for (int i = 0; i < integrationVar.size(); i++) integrationVar[i] += solver->x[i];
+ 
+        F.resize(Jacobian.size(), 0);
+        for (int i = 0; i < COUNT_KNOTS; i++)
+        {
+            F[0] -= knots[i].x * CalcPhi(i, integrationVar);
+            F[1] -= knots[i].y * CalcPhi(i, integrationVar);
+            F[2] -= knots[i].z * CalcPhi(i, integrationVar);
+        }
+
+        F[0] += knot.x;
+        F[1] += knot.y;
+        F[2] += knot.z;
+        //vector<double> F1 = MultMatrByVect(Jacobian, integrationVar);
+        //vector<double> nvkzVec = { 0, 0 , 0 };
+        nkvz = 0;
+        for (int i = 0; i < F.size(); i++) nkvz += fabs(F[i]);
+        //nkvz = sqrt(CalcScalar(nvkzVec, nvkzVec)) / sqrt(CalcScalar(F,F));
+
+    }
+    
+    vector<double> phiVec = {
+        CalcPhi(0, integrationVar),
+        CalcPhi(1, integrationVar),
+        CalcPhi(2, integrationVar),
+        CalcPhi(3, integrationVar),
+        CalcPhi(4, integrationVar),
+        CalcPhi(5, integrationVar),
+        CalcPhi(6, integrationVar),
+        CalcPhi(7, integrationVar),
+    };
+
+
+    return q[globalNumsKnots[0]] * phiVec[0] +
+        q[globalNumsKnots[1]] * phiVec[1] +
+        q[globalNumsKnots[2]] * phiVec[2] +
+        q[globalNumsKnots[3]] * phiVec[3] +
+        q[globalNumsKnots[4]] * phiVec[4] +
+        q[globalNumsKnots[5]] * phiVec[5] +
+        q[globalNumsKnots[6]] * phiVec[6] +
+        q[globalNumsKnots[7]] * phiVec[7];
+
+
+}
+
+bool Hexagon::IsIn(Knot knot)
+{
+    Triangle* leftTrBase = new Triangle();
+    leftTrBase->SetGlobalKnotNum(0, knots[0]);
+    leftTrBase->SetGlobalKnotNum(2, knots[2]);
+    leftTrBase->SetGlobalKnotNum(1, knots[1]);
+
+    Triangle* rightTrBase = new Triangle();
+    rightTrBase->SetGlobalKnotNum(1, knots[1]);
+    rightTrBase->SetGlobalKnotNum(2, knots[2]);
+    rightTrBase->SetGlobalKnotNum(3, knots[3]);
+
+    if((leftTrBase->IsIn(knot) || rightTrBase->IsIn(knot)) &&
+        knots[0].z <= knot.z && knot.z <= knots[COUNT_KNOTS - 1].z) return true;
+
+    return false;
 }
 
 

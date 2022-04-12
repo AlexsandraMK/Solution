@@ -151,6 +151,13 @@
     }
 
 
+    bool TriangularPrism::IsIn(Knot knot)
+    {
+        if (knots[0].z <= knot.z && knot.z <= knots[COUNT_KNOTS - 1].z
+            && base->IsIn(knot)) return true;
+        
+        return false;
+    }
 
 
  

@@ -47,6 +47,7 @@ public:
 	virtual int GetCountKnots() = 0;
 
 	virtual double SolveInPoint(Knot knot, vector<double> q) = 0;
+	virtual bool IsIn(Knot knot) = 0;
 
 protected:
 	int COUNT_KNOTS;
@@ -61,6 +62,7 @@ private:
 	vector<vector<double>> CalcAlfaMatrix();
 	double CalcArea();
 	double CalcDetD();
+	double CalcDetD(Knot knotsTriangle[3]);
 
 public:
 	Triangle();
@@ -72,6 +74,8 @@ public:
 
 	double SolveInPoint(Knot knot, vector<double> q);
 
+
+	bool IsIn(Knot knot);
 	static string ToString()
 	{
 		return "Triangle";
@@ -98,6 +102,7 @@ public:
 	vector<vector<double>> CalcLocalG();
 	double SolveInPoint(Knot knot, vector<double> q);
 	vector<vector<double>> CalcLocalM();
+	bool IsIn(Knot knot);
 	static string ToString()
 	{
 		return "TriangularPrism";
@@ -162,21 +167,22 @@ private:
 
 		vector<double> J_grad_j = MultMatrByVect(reversed_Jacobian, CalcGrad(j, integrationVar));
 
-		return CalcScalar(J_grad_i, J_grad_j) / detJacobian; // Исправлено
+		return CalcScalar(J_grad_i, J_grad_j) / fabs(detJacobian); // Исправлено
 	};
 
 	vector<vector<double>> CalcJacobian(vector<double> integrationVar);
 
 	vector<double> CalcGrad(int ind, vector<double> integrationVar);
 
-	double SolveInPoint(Knot knot, vector<double> q);
+	
 
 public:
 	int GetCountKnots();
 	Hexagon();
 	vector<vector<double>> CalcLocalG();
 	vector<vector<double>> CalcLocalM();
-
+	double SolveInPoint(Knot knot, vector<double> q);
+	bool IsIn(Knot knot);
 	static string ToString()
 	{
 		return "Hexagon";

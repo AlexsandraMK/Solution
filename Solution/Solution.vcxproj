@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GaussSolverSLAE.cpp" />
     <ClCompile Include="Hexagon.cpp" />
     <ClCompile Include="InitialData.cpp" />
     <ClCompile Include="InputFuncs.cpp" />
@@ -157,11 +158,13 @@
     <ClInclude Include="InputFuncs.h" />
     <ClInclude Include="Knot.h" />
     <ClInclude Include="SLAU.h" />
+    <ClInclude Include="SolverSLAE.h" />
     <ClInclude Include="TimeScheme.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="grid_time.txt" />
     <Text Include="Result.txt" />
+    <Text Include="ResultArea.txt" />
     <Text Include="ResultForTest.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
