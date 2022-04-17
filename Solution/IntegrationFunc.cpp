@@ -28,13 +28,17 @@ double Integrate(std::function<double(double, double, double, int, int, double*,
 
 double Integrate(std::function<double(std::vector<double> integrationVar, int i, int j)> func, int i, int j)
 {
-    const int countGaussKnot = 5; // Количество узлов Гаусса
+    const int countGaussKnot = 3;//5; // Количество узлов Гаусса
 
-    double xj[countGaussKnot] = { -sqrt(5. + 2. * (sqrt(10. / 7.))) / 3., -sqrt(5. - 2. * (sqrt(10. / 7.))) / 3.,	// Значения координат на узлах
-               0. , sqrt(5. - 2. * (sqrt(10. / 7.))) / 3. , sqrt(5. + 2. * (sqrt(10. / 7.))) / 3. };
+    // Значения координат на узлах
+    double xj[countGaussKnot] = { .7745966692414833, 0., -.7745966692414833 };
+    /*{ -sqrt(5. + 2. * (sqrt(10. / 7.))) / 3., -sqrt(5. - 2. * (sqrt(10. / 7.))) / 3.,	
+    0. , sqrt(5. - 2. * (sqrt(10. / 7.))) / 3. , sqrt(5. + 2. * (sqrt(10. / 7.))) / 3. };*/
 
-    double qj[countGaussKnot] = { (322. - 13. * sqrt(70.)) / 900., (322. + 13. * sqrt(70.)) / 900., 128. / 225.,	    // Веса узлов
-                   (322. + 13. * sqrt(70.)) / 900., (322. - 13. * sqrt(70.)) / 900. };
+    // Веса узлов
+    double qj[countGaussKnot] = { .55555555555555555, .8888888888888888, .55555555555555555 };
+    //{ (322. - 13. * sqrt(70.)) / 900., (322. + 13. * sqrt(70.)) / 900., 128. / 225.,	    
+    //(322. + 13. * sqrt(70.)) / 900., (322. - 13. * sqrt(70.)) / 900. };
 
     std::vector<double> axisSteps;
     std::vector<double> axisCenters;
@@ -55,3 +59,6 @@ double Integrate(std::function<double(std::vector<double> integrationVar, int i,
 
     return result / 8.; // Масштабирование
 }
+
+
+

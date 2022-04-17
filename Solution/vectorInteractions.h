@@ -56,7 +56,7 @@ static void WriteMatrix(std::vector< std::vector<double>> matrix)
 	}
 }
 
-static void SwapLinesInMatrix(std::vector< std::vector<double>> matrix, int l1, int l2)
+static void SwapLinesInMatrix(std::vector< std::vector<double>> &matrix, int l1, int l2)
 {
 	double temp;
 	for (int i = 0; i < matrix.size(); i++)
@@ -67,7 +67,7 @@ static void SwapLinesInMatrix(std::vector< std::vector<double>> matrix, int l1, 
 	}
 }
 
-static void SwapLinesInVector(std::vector<double> vector, int l1, int l2)
+static void SwapLinesInVector(std::vector<double> &vector, int l1, int l2)
 {
 	double temp = vector[l1];
 	vector[l1] = vector[l2];

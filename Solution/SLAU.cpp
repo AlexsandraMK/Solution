@@ -418,6 +418,24 @@ void SLAU::SolveInArea( InitialData* data, double time) //функция вывода в консо
         z.insert(knots[i].z);
     }
 
+    double hx = *(--x.end()) - *(x.begin());
+    double hy = *(--y.end()) - *(y.begin());
+    double hz = *(--z.end()) - *(z.begin());
+    double xbeg = *(x.begin());
+    double ybeg = *(y.begin());
+    double zbeg = *(z.begin());
+
+    x.clear();
+    y.clear();
+    z.clear();
+
+    for (int i = 1; i <= 10; i++)
+    {
+        x.insert(xbeg + i * hx / 10);
+        y.insert(ybeg + i * hy / 10);
+        z.insert(zbeg + i * hz / 10);
+    }
+
     vector<Knot*> areaKnots;
     for (set<double> ::iterator ix = x.begin(); ix != x.end(); ix++)
     {
@@ -457,21 +475,45 @@ void SLAU::SolveInArea( InitialData* data, double time) //функция вывода в консо
 
     for (int i = 0; i < areaKnots.size(); i++)
     {
-        out.setf(ios::left);
-        out << "| ";
-        out.width(15);
-        out << i + 1 << "| ";
-        out.width(15);
-        out << knots[i].x << "| ";
-        out.width(15);
-        out << knots[i].y << "| ";
-        out.width(15);
-        out << knots[i].z << "| ";
-        out.width(15);
-        out << SolveInPoint(data, knots[i]) << "| ";
-        out << endl;
+        int iKe = FindIKe(data, areaKnots[i]);
+        if (iKe >= 0)
+        {
+            out.setf(ios::left);
+            out << "| ";
+            out.width(15);
+            out << i + 1 << "| ";
+            out.width(15);
+            out << areaKnots[i]->x << "| ";
+            out.width(15);
+            out << areaKnots[i]->y << "| ";
+            out.width(15);
+            out << areaKnots[i]->z << "| ";
+            out.width(15);
+
+
+            out << data->KEs[iKe]->SolveInPoint(*areaKnots[i], q);
+
+            //if (areaKnots[i]->x == 1) out << " " << data->KEs[16]->SolveInPoint(*areaKnots[i], q);
+            out << "| ";
+            out << endl;
+        }
+
     }
 
+}
+
+int SLAU::FindIKe(InitialData* data, Knot* knot)
+{
+    int iKe = 0;
+    for (; iKe < data->KEs.size(); iKe++)
+    {
+        if (data->KEs[iKe]->IsIn(*knot))
+        {
+            return iKe;
+        }
+    }
+
+    return -1;
 }
 
 double SLAU::SolveInPoint(InitialData* data, Knot knot) 

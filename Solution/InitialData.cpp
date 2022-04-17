@@ -12,7 +12,7 @@ InitialData::InitialData()
     ReadCoordinates("cross.txt");
 
     ReadKEs("TriangularPrism.txt");
-    //ReadKEs("Hexagon.txt");
+    ReadKEs("Hexagon.txt");
 
     ReadBounds("FirstBounds.txt");
 

@@ -24,7 +24,8 @@ double GetF(Knot coord, double time)
     //return -12. * coord.x * coord.x;                                                              //return coord.x * coord.x * coord.x * coord.x;
     
                                                                                                     
-    // Ёллиптическа€ задача  
+    // Ёллиптическа€ задача 
+    //return 1.;
     //return coord.x;
     //return -2. + coord.x * coord.x;                                                               //return coord.x * coord.x;
     //return -6. * coord.x + coord.x * coord.x * coord.x;   

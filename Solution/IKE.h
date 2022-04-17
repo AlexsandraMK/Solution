@@ -13,13 +13,13 @@ public:
 	vector<int> globalNumsKnots;
 	double lambda, sigma, hi;
 	
-
-	void SetGlobalKnotNum(int numKnot, Knot coordinatesKnot)
+	virtual void SetGlobalKnotNum(int numKnot, Knot coordinatesKnot) = 0;
+	/*void SetGlobalKnotNum(int numKnot, Knot coordinatesKnot)
 	{
 		globalNumsKnots[iterKnots] = numKnot;
 		knots[iterKnots] = coordinatesKnot;
 		iterKnots++;
-	}
+	}*/
 
 	/// <summary>
 	/// Вычисляет локальную матрицу Г без влияния параметров среды
@@ -76,6 +76,7 @@ public:
 
 
 	bool IsIn(Knot knot);
+	void SetGlobalKnotNum(int numKnot, Knot coordinatesKnot);
 	static string ToString()
 	{
 		return "Triangle";
@@ -103,6 +104,7 @@ public:
 	double SolveInPoint(Knot knot, vector<double> q);
 	vector<vector<double>> CalcLocalM();
 	bool IsIn(Knot knot);
+	void SetGlobalKnotNum(int numKnot, Knot coordinatesKnot);
 	static string ToString()
 	{
 		return "TriangularPrism";
@@ -139,7 +141,7 @@ private:
 		int sizeJacobian = Jacobian.size();
 		reversed_Jacobian.resize(sizeJacobian);
 		for (int i = 0; i < sizeJacobian; i++)	reversed_Jacobian[i].resize(sizeJacobian);
-
+		double detJacobian = CalcDetMatrix(Jacobian);
 		for (int i = 0; i < sizeJacobian; i++)
 		{
 			for (int j = 0; j < sizeJacobian; j++)
@@ -155,24 +157,24 @@ private:
 					}
 				}
 
-				reversed_Jacobian[j][i] = pow(-1, i + j + 2) * (min[0] * min[3] - min[1] * min[2]);
+				reversed_Jacobian[j][i] = pow(-1, i + j + 2) * (min[0] * min[3] - min[1] * min[2]) / detJacobian;
 			}
 		}
-
-
-
-		double detJacobian = CalcDetMatrix(Jacobian);
 
 		vector<double> J_grad_i = MultMatrByVect(reversed_Jacobian, CalcGrad(i, integrationVar));
 
 		vector<double> J_grad_j = MultMatrByVect(reversed_Jacobian, CalcGrad(j, integrationVar));
+		//if (detJacobian <= 1e-14)
+		//	return 0.;
 
-		return CalcScalar(J_grad_i, J_grad_j) / fabs(detJacobian); // Исправлено
+		return CalcScalar(J_grad_i, J_grad_j) * fabs(detJacobian); // Исправлено
 	};
 
 	vector<vector<double>> CalcJacobian(vector<double> integrationVar);
 
 	vector<double> CalcGrad(int ind, vector<double> integrationVar);
+
+	vector<double> CalcF(vector<double> integrationVar, Knot knot);
 
 	
 
@@ -183,6 +185,7 @@ public:
 	vector<vector<double>> CalcLocalM();
 	double SolveInPoint(Knot knot, vector<double> q);
 	bool IsIn(Knot knot);
+	void SetGlobalKnotNum(int numKnot, Knot coordinatesKnot);
 	static string ToString()
 	{
 		return "Hexagon";

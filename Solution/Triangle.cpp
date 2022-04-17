@@ -69,8 +69,7 @@ vector<vector<double>> Triangle::CalcLocalG()
 		for (int j = 0; j < 3; j++)
 			sum += G[i][j];
 
-	if (sum != 0) 
-		cout << "Îøèáêà â Gxy" << globalNumsKnots[0] << "\t" << globalNumsKnots[1] << "\t" << globalNumsKnots[2];
+	if (sum > 1e-14) cout << "Îøèáêà â Gxy" << globalNumsKnots[0] << "\t" << globalNumsKnots[1] << "\t" << globalNumsKnots[2];
 
 	return G;
 }
@@ -118,7 +117,15 @@ bool Triangle::IsIn(Knot knot)
 		sum += abs(CalcDetD(knotsTriangle));
 	}
 
-	if (CalcArea() == sum/2) return true;
+	double area = CalcArea();
+	if (fabs(area - sum/2.) <= 1e-10) return true;
 
 	return false;
+}
+
+void Triangle::SetGlobalKnotNum(int numKnot, Knot coordinatesKnot)
+{
+	globalNumsKnots[iterKnots] = numKnot;
+	knots[iterKnots] = coordinatesKnot;
+	iterKnots++;
 }

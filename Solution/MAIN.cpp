@@ -17,7 +17,7 @@ int main()
 	slau->WriteResultForTest(timeScheme->q[1], timeScheme->time[1]);
 	slau->WriteResultForTest(timeScheme->q[2], timeScheme->time[2]);
 
-	Knot* knot = new Knot(1.5, 0.5, 0.5);
+	Knot* knot = new Knot(0, 0, 0);
 
 	// ѕоиск векторов весов на каждом шаге
 	for (; timeScheme->time[3] <= data->timeGrid->end; timeScheme->Next())
@@ -29,8 +29,10 @@ int main()
 
 		//cout << data->KEs[3]->SolveInPoint(*knot, slau->q);		//тр.призмы 1		x2 3		z2 9
 	
-		//slau->SolveInArea(data, timeScheme->time[3]);
+		slau->SolveInArea(data, timeScheme->time[3]);
 		cout << slau->SolveInPoint(data, *knot);
+		cout << data->KEs[0]->SolveInPoint(*knot, slau->q);
+
 	}
 
 	return 0;

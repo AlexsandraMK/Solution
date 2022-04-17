@@ -45,7 +45,7 @@
             for (int j = 0; j < 2; j++)
                 sum += Gz[i][j];
 
-        if (sum != 0) cout << "Îøèáêà â Gz" << globalNumsKnots[0] << "\t" << globalNumsKnots[1] << "\t" << globalNumsKnots[2];
+        if (sum > 1e-14) cout << "Îøèáêà â Gz" << globalNumsKnots[0] << "\t" << globalNumsKnots[1] << "\t" << globalNumsKnots[2];
 
         return Gz;
     }
@@ -157,6 +157,13 @@
             && base->IsIn(knot)) return true;
         
         return false;
+    }
+
+    void TriangularPrism::SetGlobalKnotNum(int numKnot, Knot coordinatesKnot)
+    {
+        globalNumsKnots[iterKnots] = numKnot;
+        knots[iterKnots] = coordinatesKnot;
+        iterKnots++;
     }
 
 
