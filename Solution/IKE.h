@@ -130,44 +130,21 @@ private:
 	{
 		double detJacobian = CalcDetMatrix(CalcJacobian(integrationVar));
 
-		return CalcPhi(i, integrationVar) * CalcPhi(j, integrationVar) * detJacobian;
+		double res = CalcPhi(i, integrationVar) * CalcPhi(j, integrationVar) * detJacobian;
+		return res;
 	};
 
 	function<double(vector<double> integrationVar, int, int)> Gij = [this](vector<double> integrationVar, int i, int j)
 	{
-		vector<vector<double>> reversed_Jacobian;
-
 		vector<vector<double>> Jacobian = CalcJacobian(integrationVar);
-		int sizeJacobian = Jacobian.size();
-		reversed_Jacobian.resize(sizeJacobian);
-		for (int i = 0; i < sizeJacobian; i++)	reversed_Jacobian[i].resize(sizeJacobian);
 		double detJacobian = CalcDetMatrix(Jacobian);
-		for (int i = 0; i < sizeJacobian; i++)
-		{
-			for (int j = 0; j < sizeJacobian; j++)
-			{
-				double min[4]{};
-				int k = 0;
-				for (int im = 0; im < sizeJacobian; im++)
-				{
-					for (int jm = 0; jm < sizeJacobian; jm++)
-					{
-						if (im != i && jm != j)
-							min[k++] = Jacobian[im][jm];
-					}
-				}
-
-				reversed_Jacobian[j][i] = pow(-1, i + j + 2) * (min[0] * min[3] - min[1] * min[2]) / detJacobian;
-			}
-		}
+		vector<vector<double>> reversed_Jacobian = CalcReverseMatrixWithSize3(Jacobian);
 
 		vector<double> J_grad_i = MultMatrByVect(reversed_Jacobian, CalcGrad(i, integrationVar));
-
 		vector<double> J_grad_j = MultMatrByVect(reversed_Jacobian, CalcGrad(j, integrationVar));
-		//if (detJacobian <= 1e-14)
-		//	return 0.;
 
-		return CalcScalar(J_grad_i, J_grad_j) * fabs(detJacobian); // Исправлено
+		double res = CalcScalar(J_grad_i, J_grad_j) *detJacobian;
+		return res; // Исправлено
 	};
 
 	vector<vector<double>> CalcJacobian(vector<double> integrationVar);

@@ -46,6 +46,40 @@ static double CalcDetMatrix(std::vector< std::vector<double>> matrix)
 				- matrix[0][0] * matrix[1][2] * matrix[2][1];
 }
 
+
+static std::vector< std::vector<double>> CalcReverseMatrixWithSize3(std::vector< std::vector<double>> matrix)
+{
+	std::vector< std::vector<double>> reverseMatrix;
+	reverseMatrix.resize(3);
+	for (int i = 0; i < reverseMatrix.size(); i++)	reverseMatrix[i].resize(reverseMatrix.size(),0);
+
+	double detJacobian = CalcDetMatrix(matrix);
+
+	if (fabs(detJacobian) < 1e-14) 
+		std::cout << "ѕроизошла ошибка в подсчете обратного якобиана";
+
+	for (int i = 0; i < reverseMatrix.size(); i++)
+	{
+		for (int j = 0; j < reverseMatrix.size(); j++)
+		{
+			double min[4]{};
+			int k = 0;
+			for (int im = 0; im < reverseMatrix.size(); im++)
+			{
+				for (int jm = 0; jm < reverseMatrix.size(); jm++)
+				{
+					if (im != i && jm != j)
+						min[k++] = matrix[im][jm];
+				}
+			}
+
+			reverseMatrix[j][i] = pow(-1, i + j + 2) * (min[0] * min[3] - min[1] * min[2]) / detJacobian;
+		}
+	}
+
+	return reverseMatrix;
+}
+
 static void WriteMatrix(std::vector< std::vector<double>> matrix)
 {
 	for (int i = 0; i < matrix.size(); i++)

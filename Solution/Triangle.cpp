@@ -115,6 +115,7 @@ bool Triangle::IsIn(Knot knot)
 											knots[(i + 1) % COUNT_KNOTS],
 											knot };
 		sum += abs(CalcDetD(knotsTriangle));
+		delete[] knotsTriangle;
 	}
 
 	double area = CalcArea();

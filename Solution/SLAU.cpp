@@ -21,9 +21,9 @@ SLAU::SLAU(InitialData* data)
     d.resize(slauSize);
 
     M = AssemblingGlobalM(data);
-    //WriteMatrix(M);
+    /*WriteMatrix(M);*/
     G = AssemblingGlobalG(data);
-    //WriteMatrix(G);
+   /* WriteMatrix(G);*/
 }
 
 void SLAU::LOC()
@@ -161,12 +161,12 @@ void SLAU::CalcA(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
             {
                 int globalK = ke->globalNumsKnots[k];
                 // эллиптическая задача
-                A[globalJ][globalK] = ke->hi * M[globalJ][globalK] + ke->lambda * G[globalJ][globalK];
+                A[globalJ][globalK] = 0 * M[globalJ][globalK] + ke->lambda * G[globalJ][globalK];
                 //A[globalJ][globalK] =
                 //    ke->hi * M[globalJ][globalK] *
                 //    2 * ((timeToCalc[3] - timeToCalc[2]) + (timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[0]))
                 //    / ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) +
-                //    ke->sigma/*0*/ * M[globalJ][globalK]
+                //    ke->sigma * M[globalJ][globalK]
                 //    * ((timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])
                 //    +  (timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[2])
                 //    +  (timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]))
@@ -177,10 +177,10 @@ void SLAU::CalcA(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
         }
     }
 
-    cout << endl;
-    for (int i = 0; i < A.size(); i++)
-        cout << A[13][i] << "\t";
-    cout << endl;
+    //cout << endl;
+    //for (int i = 0; i < A.size(); i++)
+    //    cout << A[13][i] << "\t";
+    //cout << endl;
 }
 
 void SLAU::CalcD(InitialData* data, TimeScheme* scheme) // Вычисление глобальной A
@@ -205,23 +205,23 @@ void SLAU::CalcD(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
         {
             int globalJ = ke->globalNumsKnots[j];
             d[globalJ] = b[globalJ];
-            //d[globalJ] = b[globalJ]
-            //    - ke->sigma/*0*/ * Mq_j3[globalJ] * ((timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) /
-            //                                    ((timeToCalc[0] - timeToCalc[1]) * (timeToCalc[0] - timeToCalc[2]) * (timeToCalc[0] - timeToCalc[3]))
-            //    - ke->sigma/*0*/ * Mq_j2[globalJ] * ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[2])) /
-            //                                    ((timeToCalc[1] - timeToCalc[0]) * (timeToCalc[1] - timeToCalc[2]) * (timeToCalc[1] - timeToCalc[3]))
-            //    - ke->sigma/*0*/ * Mq_j1[globalJ] * ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1])) /
-            //                                    ((timeToCalc[2] - timeToCalc[0]) * (timeToCalc[2] - timeToCalc[1]) * (timeToCalc[2] - timeToCalc[3]))
-            //    - ke->hi * Mq_j3[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[2])) /
-            //                                    ((timeToCalc[0] - timeToCalc[3]) * (timeToCalc[0] - timeToCalc[1]) * (timeToCalc[0] - timeToCalc[2]))
-            //    - ke->hi * Mq_j2[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[0]) + (timeToCalc[3] - timeToCalc[2])) /
-            //                                    ((timeToCalc[1] - timeToCalc[0]) * (timeToCalc[1] - timeToCalc[2]) * (timeToCalc[1] - timeToCalc[3]))
-            //    - ke->hi * Mq_j1[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[0])) /
-            //                                    ((timeToCalc[2] - timeToCalc[0]) * (timeToCalc[2] - timeToCalc[1]) * (timeToCalc[2] - timeToCalc[3]));
+           /* d[globalJ] = b[globalJ]
+                - ke->sigma * Mq_j3[globalJ] * ((timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) /
+                                           ((timeToCalc[0] - timeToCalc[1]) * (timeToCalc[0] - timeToCalc[2]) * (timeToCalc[0] - timeToCalc[3]))
+                - ke->sigma * Mq_j2[globalJ] * ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[2])) /
+                                           ((timeToCalc[1] - timeToCalc[0]) * (timeToCalc[1] - timeToCalc[2]) * (timeToCalc[1] - timeToCalc[3]))
+                - ke->sigma * Mq_j1[globalJ] * ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1])) /
+                                                ((timeToCalc[2] - timeToCalc[0]) * (timeToCalc[2] - timeToCalc[1]) * (timeToCalc[2] - timeToCalc[3]))
+                - ke->hi * Mq_j3[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[2])) /
+                                                ((timeToCalc[0] - timeToCalc[3]) * (timeToCalc[0] - timeToCalc[1]) * (timeToCalc[0] - timeToCalc[2]))
+                - ke->hi * Mq_j2[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[0]) + (timeToCalc[3] - timeToCalc[2])) /
+                                                ((timeToCalc[1] - timeToCalc[0]) * (timeToCalc[1] - timeToCalc[2]) * (timeToCalc[1] - timeToCalc[3]))
+                - ke->hi * Mq_j1[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[0])) /
+                                                ((timeToCalc[2] - timeToCalc[0]) * (timeToCalc[2] - timeToCalc[1]) * (timeToCalc[2] - timeToCalc[3]));*/
         }
     }
 
-    cout << d[13] << endl;
+
 }
 
 vector<double> SLAU::AssemblingGlobalF(InitialData* data, double time)
@@ -272,7 +272,7 @@ void SLAU::CalcFirstBoundaryConditions(InitialData* data, double time)
             // БОЛШИМ ЧИСЛОМ
             A[global_num_coord][global_num_coord] = 10e+14;
             d[global_num_coord] = u[global_num_coord] * 10e+14;
-            //d[global_num_coord] = 0.* 10e+14;     // Для решения
+            //d[global_num_coord] = 0.* 10e+30;     // Для решения
         }
     }
 }
@@ -351,6 +351,8 @@ void SLAU::WriteResultForSolution(vector<double> q, double time) //функция вывод
         //cout << fabs(q[i] - u[i]) << "| ";
         out << endl;
     }
+
+    out.close();
 }
 
 void SLAU::WriteResultForTest(vector<double> q, double time) //функция вывода в консоль
@@ -358,9 +360,7 @@ void SLAU::WriteResultForTest(vector<double> q, double time) //функция вывода в 
     ofstream out("ResultForTest.txt", ios_base::out | ios_base::app);
     
     out << endl << "ВРЕМЯ: " << time << endl;
-    out << endl << "Результат в узлах (веса):" << endl;
-    out << " ___________________________________________________________________________________________________ " << endl;
-
+    out << "Результат в узлах (веса):" << endl;
     out.setf(ios::left);
     out.width(15);
     out << "| № элемента " << "  | ";
@@ -376,11 +376,6 @@ void SLAU::WriteResultForTest(vector<double> q, double time) //функция вывода в 
     out << "u" << "| ";
     out.width(15);
     out << "|u-u*|" << "|";
-    out << endl;
-    out << "|----------------|----------------|";
-    out << "----------------|";
-    out << "----------------|----------------|";
-    out << "----------------|----------------|";
     out << endl;
 
     int slauSize = q.size();
@@ -406,6 +401,91 @@ void SLAU::WriteResultForTest(vector<double> q, double time) //функция вывода в 
     }
 }
 
+void SLAU::SolveInAreaForTest(InitialData* data, double time) 
+{
+    set<double> x, y, z;
+
+    for (int i = 0; i < knots.size(); i++)
+    {
+        x.insert(knots[i].x);
+        y.insert(knots[i].y);
+        z.insert(knots[i].z);
+    }
+
+    double xbeg = *(x.begin());
+    double ybeg = *(y.begin());
+    double zbeg = *(z.begin());
+
+    double hx = *(--x.end()) - xbeg;
+    double hy = *(--y.end()) - ybeg;
+    double hz = *(--z.end()) - zbeg;
+
+    x.clear();
+    y.clear();
+    z.clear();
+
+    int nStepsInArea = 25;
+
+    for (int i = 1; i <= nStepsInArea; i++)
+    {
+        x.insert(xbeg + i * hx / nStepsInArea);
+        y.insert(ybeg + i * hy / nStepsInArea);
+        z.insert(zbeg + i * hz / nStepsInArea);
+    }
+
+    string str = "ResultArea" + std::to_string(time) + ".txt";
+
+    ofstream out(str);
+    int i = 0;
+    for (set<double> ::iterator iz = z.begin(); iz != z.end(); iz++)
+    {
+        for (set<double> ::iterator ix = x.begin(); ix != x.end(); ix++)
+        {
+            for (set<double> ::iterator iy = y.begin(); iy != y.end(); iy++, i++)
+            {
+                Knot* knot = new Knot(*ix, *iy, *iz);
+                int iKe = FindIKe(data, knot);
+
+                if (iKe >= 0)
+                {
+                    double result = data->KEs[iKe]->SolveInPoint(*knot, q);
+                    double trueResult = GetU(*knot, time);
+                    double diffResult = fabs(trueResult - result);
+                    if (diffResult > 1e-14)
+                    {
+                        out.setf(ios::left);
+                        out.width(15);
+                        out << knot->x << " ";
+                        out.width(15);
+                        out << knot->y << " ";
+                        out.width(15);
+                        out << knot->z << " ";
+
+                        out.width(15);
+                        double result = data->KEs[iKe]->SolveInPoint(*knot, q);
+                        out << result << " ";
+
+                        out.width(15);
+                        double trueResult = GetU(*knot, time);
+                        out << trueResult;
+
+                        out.width(15);
+                        double diffResult = fabs(trueResult - result);
+                        out << diffResult;
+
+                        out << endl;
+                    }
+                }
+
+                delete knot;
+            }
+        }
+
+    }
+
+    if (out.is_open())  out.close();
+}
+
 
 void SLAU::SolveInArea( InitialData* data, double time) //функция вывода в консоль
 {
@@ -425,33 +505,35 @@ void SLAU::SolveInArea( InitialData* data, double time) //функция вывода в консо
     double ybeg = *(y.begin());
     double zbeg = *(z.begin());
 
-    x.clear();
-    y.clear();
+    //x.clear();
+    //y.clear();
     z.clear();
 
-    for (int i = 1; i <= 10; i++)
+    for (int i = 1; i <= 25; i++)
     {
-        x.insert(xbeg + i * hx / 10);
-        y.insert(ybeg + i * hy / 10);
-        z.insert(zbeg + i * hz / 10);
+        x.insert(xbeg + i * hx / 25);
+        y.insert(ybeg + i * hy / 25);
+        z.insert(2.5);
     }
 
-    vector<Knot*> areaKnots;
-    for (set<double> ::iterator ix = x.begin(); ix != x.end(); ix++)
+    /*vector<Knot*> areaKnots;
+    for (set<double> ::iterator iz = z.begin(); iz != z.end(); iz++ )
     {
-        for (set<double> ::iterator iy = y.begin(); iy != y.end(); iy++)
+        for (set<double> ::iterator ix = x.begin(); ix != x.end(); ix++ )
         {
-            for (set<double> ::iterator iz = z.begin(); iz != z.end(); iz++)
+            for (set<double> ::iterator iy = y.begin(); iy != y.end(); iy++)
             {
                 Knot* knot = new Knot(*ix, *iy, *iz);
                 areaKnots.push_back(knot);
             }
         }
-    }
+    }*/
 
-    ofstream out("ResultArea.txt", ios_base::out | ios_base::app);
+    string str = "ResultArea"+std::to_string(time) + ".txt";
 
-    out << endl << "ВРЕМЯ: " << time << endl;
+    ofstream out(str, ios_base::out | ios_base::app);
+
+    /*out << endl << "ВРЕМЯ: " << time << endl;
     out << endl << "Результат в узлах (веса):" << endl;
     out << " _____________________________________________________________________________________ " << endl;
 
@@ -471,35 +553,53 @@ void SLAU::SolveInArea( InitialData* data, double time) //функция вывода в консо
     out << "|----------------|";
     out << "----------------|----------------|----------------|";
     out << "----------------|";
-    out << endl;
+    out << endl;*/
+    out.close();
 
-    for (int i = 0; i < areaKnots.size(); i++)
+    //for (int i = 0; i < areaKnots.size(); i++)
+    //{
+    int i = 0;
+    for (set<double> ::iterator iz = z.begin(); iz != z.end(); iz++)
     {
-        int iKe = FindIKe(data, areaKnots[i]);
-        if (iKe >= 0)
+        for (set<double> ::iterator ix = x.begin(); ix != x.end(); ix++)
         {
-            out.setf(ios::left);
-            out << "| ";
-            out.width(15);
-            out << i + 1 << "| ";
-            out.width(15);
-            out << areaKnots[i]->x << "| ";
-            out.width(15);
-            out << areaKnots[i]->y << "| ";
-            out.width(15);
-            out << areaKnots[i]->z << "| ";
-            out.width(15);
+            for (set<double> ::iterator iy = y.begin(); iy != y.end(); iy++)
+            {
+                Knot* knot = new Knot(*ix, *iy, *iz);
+                //int iKe = FindIKe(data, areaKnots[i]);
+                int iKe = FindIKe(data, knot);
 
+                if (iKe >= 0)
+                {
+                    out.open(str, ios_base::out | ios_base::app);
+                    out.setf(ios::left);
+                    //out << "| ";
+                    //out.width(15);
+                    //out << i + 1 << "| ";
+                    out.width(15);
+                    out << knot->x << " ";
+                    out.width(15);
+                    out << knot->y << " ";
+                    //out.width(15);
+                    //out << knot->z << "| ";
+                    //out.width(15);
 
-            out << data->KEs[iKe]->SolveInPoint(*areaKnots[i], q);
+                    double result = data->KEs[iKe]->SolveInPoint(*knot, q);
+                    if (fabs(result) < 1e-4) result = 0;
+                    out << result;
 
-            //if (areaKnots[i]->x == 1) out << " " << data->KEs[16]->SolveInPoint(*areaKnots[i], q);
-            out << "| ";
-            out << endl;
+                    //if (areaKnots[i]->x == 1) out << " " << data->KEs[16]->SolveInPoint(*areaKnots[i], q);
+                    //out << "| ";
+                    out << endl;
+                    delete knot;
+                    out.close();
+                }
+            }
         }
 
     }
-
+    
+    if(out.is_open())out.close();
 }
 
 int SLAU::FindIKe(InitialData* data, Knot* knot)
@@ -512,6 +612,8 @@ int SLAU::FindIKe(InitialData* data, Knot* knot)
             return iKe;
         }
     }
+
+    cout << "Точка - " << knot->x << " " << knot->y << " " << knot->z << " - находится вне расчетной области\n";
 
     return -1;
 }

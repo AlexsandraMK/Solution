@@ -28,7 +28,7 @@ double Integrate(std::function<double(double, double, double, int, int, double*,
 
 double Integrate(std::function<double(std::vector<double> integrationVar, int i, int j)> func, int i, int j)
 {
-    const int countGaussKnot = 3;//5; // Количество узлов Гаусса
+    const int countGaussKnot = 3; /*5;*/ // Количество узлов Гаусса
 
     // Значения координат на узлах
     double xj[countGaussKnot] = { .7745966692414833, 0., -.7745966692414833 };
@@ -53,8 +53,10 @@ double Integrate(std::function<double(std::vector<double> integrationVar, int i,
         for (int iy = 0; iy < countGaussKnot; iy++)
             for (int iz = 0; iz < countGaussKnot; iz++)
             {
+                double resFunc = 0.;
                 integrationVar = { axisCenters[ksi] + xj[ix] * axisSteps[ksi], axisCenters[etta] + xj[iy] * axisSteps[etta], axisCenters[theta] + xj[iz] * axisSteps[theta] };
-                result += qj[ix] * qj[iy] * qj[iz] * (func(integrationVar, i, j));
+                resFunc = func(integrationVar, i, j);
+                result += qj[ix] * qj[iy] * qj[iz] * resFunc;
             }
 
     return result / 8.; // Масштабирование

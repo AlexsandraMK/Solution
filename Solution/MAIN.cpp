@@ -13,11 +13,9 @@ int main()
 	//slau->WriteResultForSolution(timeScheme->q[0], timeScheme->time[0]);
 	//slau->WriteResultForSolution(timeScheme->q[1], timeScheme->time[1]);
 	//slau->WriteResultForSolution(timeScheme->q[2], timeScheme->time[2]);
-	slau->WriteResultForTest(timeScheme->q[0], timeScheme->time[0]);
-	slau->WriteResultForTest(timeScheme->q[1], timeScheme->time[1]);
-	slau->WriteResultForTest(timeScheme->q[2], timeScheme->time[2]);
-
-	Knot* knot = new Knot(0, 0, 0);
+	//slau->WriteResultForTest(timeScheme->q[0], timeScheme->time[0]);
+	//slau->WriteResultForTest(timeScheme->q[1], timeScheme->time[1]);
+	//slau->WriteResultForTest(timeScheme->q[2], timeScheme->time[2]);
 
 	// ѕоиск векторов весов на каждом шаге
 	for (; timeScheme->time[3] <= data->timeGrid->end; timeScheme->Next())
@@ -25,14 +23,8 @@ int main()
 		slau->SolveSLAU(data, timeScheme);
 		//slau->WriteResultForSolution(slau->q, timeScheme->time[3]);
 		slau->WriteResultForTest(slau->q, timeScheme->time[3]);
-		timeScheme->q[3] = slau->q;
-
-		//cout << data->KEs[3]->SolveInPoint(*knot, slau->q);		//тр.призмы 1		x2 3		z2 9
-	
-		slau->SolveInArea(data, timeScheme->time[3]);
-		cout << slau->SolveInPoint(data, *knot);
-		cout << data->KEs[0]->SolveInPoint(*knot, slau->q);
-
+		timeScheme->q[3] = slau->q;	
+		slau->SolveInAreaForTest(data, timeScheme->time[3]);
 	}
 
 	return 0;
