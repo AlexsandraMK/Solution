@@ -161,17 +161,17 @@ void SLAU::CalcA(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
             {
                 int globalK = ke->globalNumsKnots[k];
                 // эллиптическая задача
-                A[globalJ][globalK] = 0 * M[globalJ][globalK] + ke->lambda * G[globalJ][globalK];
-                //A[globalJ][globalK] =
-                //    ke->hi * M[globalJ][globalK] *
-                //    2 * ((timeToCalc[3] - timeToCalc[2]) + (timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[0]))
-                //    / ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) +
-                //    ke->sigma * M[globalJ][globalK]
-                //    * ((timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])
-                //    +  (timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[2])
-                //    +  (timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]))
-                //    / ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) +
-                //    ke->lambda * G[globalJ][globalK];
+                /*A[globalJ][globalK] = ke->hi * M[globalJ][globalK] + ke->lambda * G[globalJ][globalK];*/
+                A[globalJ][globalK] =
+                    ke->hi * M[globalJ][globalK] *
+                    2 * ((timeToCalc[3] - timeToCalc[2]) + (timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[0]))
+                    / ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) +
+                    ke->sigma * M[globalJ][globalK]
+                    * ((timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])
+                    +  (timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[2])
+                    +  (timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]))
+                    / ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) +
+                    ke->lambda * G[globalJ][globalK];
             }
 
         }
@@ -204,8 +204,8 @@ void SLAU::CalcD(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
         for (int j = 0; j < countKnots; j++)
         {
             int globalJ = ke->globalNumsKnots[j];
-            d[globalJ] = b[globalJ];
-           /* d[globalJ] = b[globalJ]
+            /*d[globalJ] = b[globalJ];*/
+            d[globalJ] = b[globalJ]
                 - ke->sigma * Mq_j3[globalJ] * ((timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) /
                                            ((timeToCalc[0] - timeToCalc[1]) * (timeToCalc[0] - timeToCalc[2]) * (timeToCalc[0] - timeToCalc[3]))
                 - ke->sigma * Mq_j2[globalJ] * ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[2])) /
@@ -217,7 +217,7 @@ void SLAU::CalcD(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
                 - ke->hi * Mq_j2[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[0]) + (timeToCalc[3] - timeToCalc[2])) /
                                                 ((timeToCalc[1] - timeToCalc[0]) * (timeToCalc[1] - timeToCalc[2]) * (timeToCalc[1] - timeToCalc[3]))
                 - ke->hi * Mq_j1[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[0])) /
-                                                ((timeToCalc[2] - timeToCalc[0]) * (timeToCalc[2] - timeToCalc[1]) * (timeToCalc[2] - timeToCalc[3]));*/
+                                                ((timeToCalc[2] - timeToCalc[0]) * (timeToCalc[2] - timeToCalc[1]) * (timeToCalc[2] - timeToCalc[3]));
         }
     }
 
