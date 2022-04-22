@@ -204,7 +204,7 @@ double Hexagon::SolveInPoint(Knot knot, vector<double> q)
         for (int i = 0; i < tempVars.size(); i++) tempVars[i] = integrationVar[i] + b * solver->x[i];
         F = CalcF(tempVars, knot);
 
-        while (CalcScalar(F,F) > CalcScalar(F1, F1) && k!=0 && CalcScalar(F, F) >eps)
+        while (CalcScalar(F,F) > CalcScalar(F1, F1) && k!=0 && CalcScalar(F, F) >eps && b!=0)
         {
             b /= 2;
             tempVars.resize(3, 0);

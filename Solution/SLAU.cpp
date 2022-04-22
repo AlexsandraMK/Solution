@@ -166,7 +166,7 @@ void SLAU::CalcA(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
                     ke->hi * M[globalJ][globalK] *
                     2 * ((timeToCalc[3] - timeToCalc[2]) + (timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[0]))
                     / ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) +
-                    ke->sigma * M[globalJ][globalK]
+                    /*ke->sigma*/ 0 * M[globalJ][globalK]
                     * ((timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])
                     +  (timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[2])
                     +  (timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]))
@@ -206,11 +206,11 @@ void SLAU::CalcD(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
             int globalJ = ke->globalNumsKnots[j];
             /*d[globalJ] = b[globalJ];*/
             d[globalJ] = b[globalJ]
-                - ke->sigma * Mq_j3[globalJ] * ((timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) /
+                - /*ke->sigma*/0 * Mq_j3[globalJ] * ((timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) /
                                            ((timeToCalc[0] - timeToCalc[1]) * (timeToCalc[0] - timeToCalc[2]) * (timeToCalc[0] - timeToCalc[3]))
-                - ke->sigma * Mq_j2[globalJ] * ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[2])) /
+                - /*ke->sigma*/0 * Mq_j2[globalJ] * ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[2])) /
                                            ((timeToCalc[1] - timeToCalc[0]) * (timeToCalc[1] - timeToCalc[2]) * (timeToCalc[1] - timeToCalc[3]))
-                - ke->sigma * Mq_j1[globalJ] * ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1])) /
+                - /*ke->sigma*/0 * Mq_j1[globalJ] * ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1])) /
                                                 ((timeToCalc[2] - timeToCalc[0]) * (timeToCalc[2] - timeToCalc[1]) * (timeToCalc[2] - timeToCalc[3]))
                 - ke->hi * Mq_j3[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[2])) /
                                                 ((timeToCalc[0] - timeToCalc[3]) * (timeToCalc[0] - timeToCalc[1]) * (timeToCalc[0] - timeToCalc[2]))
@@ -259,20 +259,20 @@ void SLAU::CalcFirstBoundaryConditions(InitialData* data, double time)
         for (int j = 0; j < 4; j++)
         {
             int global_num_coord = data->bounds[i].globalNum[j];
-            //for (int k = 0; k < data->knots.size(); k++)
-            //{
-            //    A[global_num_coord][k] = 0;
-            //}
+            for (int k = 0; k < data->knots.size(); k++)
+            {
+                A[global_num_coord][k] = 0;
+            }
 
-            //A[global_num_coord][global_num_coord] = 1.;
-            //d[global_num_coord] = u[global_num_coord];
-            ////d[global_num_coord] = 0.;     // Для решения
+            A[global_num_coord][global_num_coord] = 1.;
+            /*d[global_num_coord] = u[global_num_coord];*/
+            d[global_num_coord] = 0.;     // Для решения
 
 
             // БОЛШИМ ЧИСЛОМ
-            A[global_num_coord][global_num_coord] = 10e+14;
-            d[global_num_coord] = u[global_num_coord] * 10e+14;
-            //d[global_num_coord] = 0.* 10e+30;     // Для решения
+            //A[global_num_coord][global_num_coord] = 10e+14;
+            //d[global_num_coord] = u[global_num_coord] * 10e+14;
+            //d[global_num_coord] = 0.* 10e+14;     // Для решения
         }
     }
 }
@@ -451,8 +451,8 @@ void SLAU::SolveInAreaForTest(InitialData* data, double time)
                     double result = data->KEs[iKe]->SolveInPoint(*knot, q);
                     double trueResult = GetU(*knot, time);
                     double diffResult = fabs(trueResult - result);
-                    if (diffResult > 1e-14)
-                    {
+                    //if (diffResult > 1e-8)
+                    //{
                         out.setf(ios::left);
                         out.width(15);
                         out << knot->x << " ";
@@ -462,19 +462,19 @@ void SLAU::SolveInAreaForTest(InitialData* data, double time)
                         out << knot->z << " ";
 
                         out.width(15);
-                        double result = data->KEs[iKe]->SolveInPoint(*knot, q);
+                        
                         out << result << " ";
 
                         out.width(15);
-                        double trueResult = GetU(*knot, time);
+                        
                         out << trueResult;
 
                         out.width(15);
-                        double diffResult = fabs(trueResult - result);
+                        
                         out << diffResult;
 
                         out << endl;
-                    }
+                    //}
                 }
 
                 delete knot;
@@ -507,13 +507,13 @@ void SLAU::SolveInArea( InitialData* data, double time) //функция вывода в консо
 
     //x.clear();
     //y.clear();
-    z.clear();
+    x.clear();
 
     for (int i = 1; i <= 25; i++)
     {
-        x.insert(xbeg + i * hx / 25);
+        z.insert(zbeg + i * hz / 25);
         y.insert(ybeg + i * hy / 25);
-        z.insert(2.5);
+        x.insert(0.);
     }
 
     /*vector<Knot*> areaKnots;
@@ -531,7 +531,7 @@ void SLAU::SolveInArea( InitialData* data, double time) //функция вывода в консо
 
     string str = "ResultArea"+std::to_string(time) + ".txt";
 
-    ofstream out(str, ios_base::out | ios_base::app);
+    ofstream out(str);
 
     /*out << endl << "ВРЕМЯ: " << time << endl;
     out << endl << "Результат в узлах (веса):" << endl;
@@ -554,7 +554,7 @@ void SLAU::SolveInArea( InitialData* data, double time) //функция вывода в консо
     out << "----------------|----------------|----------------|";
     out << "----------------|";
     out << endl;*/
-    out.close();
+    /*out.close();*/
 
     //for (int i = 0; i < areaKnots.size(); i++)
     //{
@@ -569,31 +569,31 @@ void SLAU::SolveInArea( InitialData* data, double time) //функция вывода в консо
                 //int iKe = FindIKe(data, areaKnots[i]);
                 int iKe = FindIKe(data, knot);
 
-                if (iKe >= 0)
-                {
-                    out.open(str, ios_base::out | ios_base::app);
-                    out.setf(ios::left);
-                    //out << "| ";
-                    //out.width(15);
-                    //out << i + 1 << "| ";
-                    out.width(15);
-                    out << knot->x << " ";
-                    out.width(15);
-                    out << knot->y << " ";
-                    //out.width(15);
-                    //out << knot->z << "| ";
-                    //out.width(15);
 
-                    double result = data->KEs[iKe]->SolveInPoint(*knot, q);
-                    if (fabs(result) < 1e-4) result = 0;
-                    out << result;
+                /*out.open(str, ios_base::out | ios_base::app);*/
+                out.setf(ios::left);
+                //out << "| ";
+                //out.width(15);
+                //out << i + 1 << "| ";
+                out.width(15);
+                out << knot->y << " ";
+                out.width(15);
+                out << knot->z << " ";
+                //out.width(15);
+                //out << knot->z << "| ";
+                //out.width(15);
 
-                    //if (areaKnots[i]->x == 1) out << " " << data->KEs[16]->SolveInPoint(*areaKnots[i], q);
-                    //out << "| ";
-                    out << endl;
-                    delete knot;
-                    out.close();
-                }
+                double result;
+                if (iKe < 0) result = 0.;
+                else  result = data->KEs[iKe]->SolveInPoint(*knot, q);
+                //if (fabs(result) < 9e-5) result = 0;
+                out << result;
+
+                //if (areaKnots[i]->x == 1) out << " " << data->KEs[16]->SolveInPoint(*areaKnots[i], q);
+                //out << "| ";
+                out << endl;
+                delete knot;
+                /*out.close()*/;
             }
         }
 

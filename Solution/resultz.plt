@@ -1,5 +1,5 @@
 unset key
-set palette functions  gray , gray , gray 
+set palette functions gray, gray, gray
 set cntrparam linear
 set dgrid 50,50
 set pm3d at b

@@ -13,12 +13,12 @@ double GetF(Knot coord, double time)
 
     // Гиперболическая          
     //return 0.; // Не зависит от пространства и времени                                     //u:   //return 1.; // Не зависит от пространства и времени
-    return 0; // Не зависит от времени                                                            //return coord.x; // Не зависит от времени
+    //return 0; // Не зависит от времени                                                            //return coord.x; // Не зависит от времени
     //return 1.; // Не зависит от пространства                                                      //return time; // Не зависит от пространства
     //return 1.; // Зависит и от пространства и от времени                                          //return coord.x + time; // Зависит и от пространства и от времени
-    //return 2. + 2. * time; // Зависит от времени квадратично                                      //return time * time; // Зависит от времени квадратично
-    //return 6 * time + 3. * time * time; // Зависит от времени кубически                           //return time * time * time; // Зависит от времени кубически
-    //return 12. * time * time + 4. * time * time * time; // Должна давать погрешность              //return time * time * time * time; // Должна давать погрешность
+    //return 2.; // Зависит от времени квадратично                                      //return time * time; // Зависит от времени квадратично
+    //return 6 * time; // Зависит от времени кубически                           //return time * time * time; // Зависит от времени кубически
+    //return 12. * time * time; // Должна давать погрешность              //return time * time * time * time; // Должна давать погрешность
     //return -2.;                                                                                 //return coord.x * coord.x;
     //return -6. * coord.x;                                                                         //return coord.x * coord.x* coord.x;
     //return -12. * coord.x * coord.x;                                                              //return coord.x * coord.x * coord.x * coord.x;
@@ -47,7 +47,7 @@ double GetF(Knot coord, double time)
 double GetU(Knot coord, double time)
 {
     //return 1.; // Не зависит от пространства и времени
-    return coord.x; // Не зависит от времени
+    //return coord.x; // Не зависит от времени
     //return time; // Не зависит от пространства
     //return coord.x + time; // Зависит и от пространства и от времени
     //return time * time; // Зависит от времени квадратично
@@ -63,9 +63,9 @@ double GetU(Knot coord, double time)
     //return coord.x * coord.x* coord.x;
     //return coord.x * coord.x * coord.x * coord.x;
     //return coord.x * coord.x * coord.x * coord.x * coord.x * coord.x;
-    //if (time == 0.001 / 2 &&
-    //    coord.x == 0 &&
-    //    coord.y == 0 &&
-    //    coord.z == 2.5) return 1e+6*std::sin(2*3.14 / 0.001 / 2 *time);
+    if (time == 1.25e-06 &&
+        coord.x == 0 && //0.005
+        coord.y == 0 &&
+        coord.z == 2.5) return 10/**std::sin(2*3.14 / 5 *time)*/;
     return 0;
 }
