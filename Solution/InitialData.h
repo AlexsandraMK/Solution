@@ -16,6 +16,13 @@ struct Bound // Граница
     int globalNum[4]; // Номера узла
 };
 
+struct Coeff
+{
+    double density; // плотность
+    double Yung;    // модуль Юнга
+    double Poisson; // коэффициент Пуассона
+};
+
 
 class InitialData
 {
@@ -23,8 +30,11 @@ public:
     vector<Knot> knots; // Массив координат узлов
     vector<IKE*> KEs;
     vector<Bound> bounds; // Массив границ
+    vector<Coeff> coeffs;
     TimeGrid* timeGrid;
     InitialData();
+
+    void ReadCoefficients(string pathFile);
 
 protected:
     void ReadCoordinates(string pathFile);

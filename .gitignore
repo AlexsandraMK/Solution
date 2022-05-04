@@ -9,7 +9,7 @@ Diplom/.vs/Diplom/v16/.suo
 Diplom/.vs/Diplom/v16/Browse.VC.db
 
 
-
+*.txt
 # User-specific files
 *.rsuser
 *.suo

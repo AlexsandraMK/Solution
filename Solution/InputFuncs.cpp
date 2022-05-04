@@ -16,9 +16,9 @@ double GetF(Knot coord, double time)
     //return 0; // Не зависит от времени                                                            //return coord.x; // Не зависит от времени
     //return 1.; // Не зависит от пространства                                                      //return time; // Не зависит от пространства
     //return 1.; // Зависит и от пространства и от времени                                          //return coord.x + time; // Зависит и от пространства и от времени
-    //return 2.; // Зависит от времени квадратично                                      //return time * time; // Зависит от времени квадратично
-    //return 6 * time; // Зависит от времени кубически                           //return time * time * time; // Зависит от времени кубически
-    //return 12. * time * time; // Должна давать погрешность              //return time * time * time * time; // Должна давать погрешность
+    //return 2. + 2.*time; // Зависит от времени квадратично                                      //return time * time; // Зависит от времени квадратично
+    //return 6 * time + 3.*time*time; // Зависит от времени кубически                           //return time * time * time; // Зависит от времени кубически
+    return 12. * time * time + 4*time*time*time; // Должна давать погрешность              //return time * time * time * time; // Должна давать погрешность
     //return -2.;                                                                                 //return coord.x * coord.x;
     //return -6. * coord.x;                                                                         //return coord.x * coord.x* coord.x;
     //return -12. * coord.x * coord.x;                                                              //return coord.x * coord.x * coord.x * coord.x;
@@ -52,7 +52,7 @@ double GetU(Knot coord, double time)
     //return coord.x + time; // Зависит и от пространства и от времени
     //return time * time; // Зависит от времени квадратично
     //return time * time * time; // Зависит от времени кубически
-    //return time * time * time * time; // Должна давать погрешность
+    return time * time * time * time; // Должна давать погрешность
     //return coord.x * coord.x;
     //return coord.x * coord.x * coord.x;
     //return coord.x * coord.x * coord.x * coord.x;

@@ -10,8 +10,8 @@
 InitialData::InitialData()
 {
     ReadCoordinates("cross.txt");
-
-    ReadKEs("TriangularPrism.txt");
+    ReadCoefficients("coeffs.txt");
+    //ReadKEs("TriangularPrism.txt");
     ReadKEs("Hexagon.txt");
 
     ReadBounds("FirstBounds.txt");
@@ -19,6 +19,22 @@ InitialData::InitialData()
     timeGrid = new TimeGrid();
     ReadTime("grid_time.txt");
 }
+
+/// <summary>
+/// Чтение коэффициентов
+/// </summary>
+/// <param name="pathFile">Имя файла</param>
+/// <return name="knots">Координты узлов</return>
+void InitialData::ReadCoefficients(string pathFile)
+{
+    ifstream in(pathFile);
+    int nCoeffs;
+    in >> nCoeffs;
+    coeffs.resize(nCoeffs);
+    for (int i = 0; i < nCoeffs; i++)  in >> coeffs[i].density >> coeffs[i].Yung >> coeffs[i].Poisson;
+    in.close();
+}
+
 
 /// <summary>
 /// Чтение координат узлов
@@ -75,9 +91,12 @@ void InitialData::ReadKEs(string pathFile) // Узлы
             ke->SetGlobalKnotNum(globalNum, knots[globalNum]);
         }
 
-        in >> ke->lambda;    // лямбда
-        in >> ke->sigma;     // гамма
-        in >> ke->hi;        // хи
+        //in >> ke->lambda;    // лямбда
+        //in >> ke->sigma;     // гамма
+        //in >> ke->hi;        // хи
+        in >> ke->iCoeff;
+
+
         KEs[iKE] = ke;
     }
     in.close();

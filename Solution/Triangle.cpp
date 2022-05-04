@@ -4,7 +4,8 @@ Triangle::Triangle()
 {
 	globalNumsKnots.resize(COUNT_KNOTS);
 	knots.resize(COUNT_KNOTS);
-	lambda = sigma = hi = 0;
+	lambda = sigma = hi = 0.;
+	iCoeff = 0;
 	iterKnots = 0;
 }
 

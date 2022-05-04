@@ -153,6 +153,13 @@ void SLAU::CalcA(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
     for (int iKE = 0; iKE < nKEs; iKE++)
     {
         IKE* ke = data->KEs[iKE];
+
+        double hi, sigma, lambda;
+        hi = data->coeffs[ke->iCoeff].density;
+        sigma = data->coeffs[ke->iCoeff].Poisson;
+        lambda = data->coeffs[ke->iCoeff].Yung;
+
+
         int countKnots = ke->GetCountKnots();
         for (int j = 0; j < countKnots; j++)
         {
@@ -163,15 +170,15 @@ void SLAU::CalcA(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
                 // эллиптическая задача
                 /*A[globalJ][globalK] = ke->hi * M[globalJ][globalK] + ke->lambda * G[globalJ][globalK];*/
                 A[globalJ][globalK] =
-                    ke->hi * M[globalJ][globalK] *
+                    hi * M[globalJ][globalK] *
                     2 * ((timeToCalc[3] - timeToCalc[2]) + (timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[0]))
                     / ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) +
-                    /*ke->sigma*/ 0 * M[globalJ][globalK]
+                    sigma * M[globalJ][globalK]
                     * ((timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])
                     +  (timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[2])
                     +  (timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]))
                     / ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) +
-                    ke->lambda * G[globalJ][globalK];
+                    lambda * G[globalJ][globalK];
             }
 
         }
@@ -200,23 +207,29 @@ void SLAU::CalcD(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
     for (int iKE = 0; iKE < nKEs; iKE++)
     {
         IKE* ke = data->KEs[iKE];
+
+        double hi, sigma, lambda;
+        hi = data->coeffs[ke->iCoeff].density;
+        sigma = data->coeffs[ke->iCoeff].Poisson;
+        lambda = data->coeffs[ke->iCoeff].Yung;
+
         int countKnots = ke->GetCountKnots();
         for (int j = 0; j < countKnots; j++)
         {
             int globalJ = ke->globalNumsKnots[j];
             /*d[globalJ] = b[globalJ];*/
             d[globalJ] = b[globalJ]
-                - /*ke->sigma*/0 * Mq_j3[globalJ] * ((timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) /
+                - sigma * Mq_j3[globalJ] * ((timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) /
                                            ((timeToCalc[0] - timeToCalc[1]) * (timeToCalc[0] - timeToCalc[2]) * (timeToCalc[0] - timeToCalc[3]))
-                - /*ke->sigma*/0 * Mq_j2[globalJ] * ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[2])) /
+                - sigma * Mq_j2[globalJ] * ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[2])) /
                                            ((timeToCalc[1] - timeToCalc[0]) * (timeToCalc[1] - timeToCalc[2]) * (timeToCalc[1] - timeToCalc[3]))
-                - /*ke->sigma*/0 * Mq_j1[globalJ] * ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1])) /
+                - sigma * Mq_j1[globalJ] * ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1])) /
                                                 ((timeToCalc[2] - timeToCalc[0]) * (timeToCalc[2] - timeToCalc[1]) * (timeToCalc[2] - timeToCalc[3]))
-                - ke->hi * Mq_j3[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[2])) /
+                - hi * Mq_j3[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[2])) /
                                                 ((timeToCalc[0] - timeToCalc[3]) * (timeToCalc[0] - timeToCalc[1]) * (timeToCalc[0] - timeToCalc[2]))
-                - ke->hi * Mq_j2[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[0]) + (timeToCalc[3] - timeToCalc[2])) /
+                - hi * Mq_j2[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[0]) + (timeToCalc[3] - timeToCalc[2])) /
                                                 ((timeToCalc[1] - timeToCalc[0]) * (timeToCalc[1] - timeToCalc[2]) * (timeToCalc[1] - timeToCalc[3]))
-                - ke->hi * Mq_j1[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[0])) /
+                - hi * Mq_j1[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[0])) /
                                                 ((timeToCalc[2] - timeToCalc[0]) * (timeToCalc[2] - timeToCalc[1]) * (timeToCalc[2] - timeToCalc[3]));
         }
     }
@@ -265,8 +278,8 @@ void SLAU::CalcFirstBoundaryConditions(InitialData* data, double time)
             }
 
             A[global_num_coord][global_num_coord] = 1.;
-            /*d[global_num_coord] = u[global_num_coord];*/
-            d[global_num_coord] = 0.;     // Для решения
+            d[global_num_coord] = u[global_num_coord];
+            //d[global_num_coord] = 0.;     // Для решения
 
 
             // БОЛШИМ ЧИСЛОМ
@@ -507,13 +520,13 @@ void SLAU::SolveInArea( InitialData* data, double time) //функция вывода в консо
 
     //x.clear();
     //y.clear();
-    x.clear();
+    y.clear();
 
     for (int i = 1; i <= 25; i++)
     {
         z.insert(zbeg + i * hz / 25);
-        y.insert(ybeg + i * hy / 25);
-        x.insert(0.);
+        x.insert(xbeg + i * hx / 25);
+        y.insert(0.);
     }
 
     /*vector<Knot*> areaKnots;
@@ -559,11 +572,11 @@ void SLAU::SolveInArea( InitialData* data, double time) //функция вывода в консо
     //for (int i = 0; i < areaKnots.size(); i++)
     //{
     int i = 0;
-    for (set<double> ::iterator iz = z.begin(); iz != z.end(); iz++)
+    for (set<double> ::iterator iy = y.begin(); iy != y.end(); iy++)
     {
         for (set<double> ::iterator ix = x.begin(); ix != x.end(); ix++)
         {
-            for (set<double> ::iterator iy = y.begin(); iy != y.end(); iy++)
+            for (set<double> ::iterator iz = z.begin(); iz != z.end(); iz++)
             {
                 Knot* knot = new Knot(*ix, *iy, *iz);
                 //int iKe = FindIKe(data, areaKnots[i]);
@@ -576,7 +589,7 @@ void SLAU::SolveInArea( InitialData* data, double time) //функция вывода в консо
                 //out.width(15);
                 //out << i + 1 << "| ";
                 out.width(15);
-                out << knot->y << " ";
+                out << knot->x << " ";
                 out.width(15);
                 out << knot->z << " ";
                 //out.width(15);

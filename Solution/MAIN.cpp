@@ -25,7 +25,7 @@ int main()
 		slau->WriteResultForTest(slau->q, timeScheme->time[3]);
 		timeScheme->q[3] = slau->q;	
 		/*slau->SolveInAreaForTest(data, timeScheme->time[3]);*/
-		slau->SolveInArea(data, timeScheme->time[3]);
+		//slau->SolveInArea(data, timeScheme->time[3]);
 	}
 
 	return 0;

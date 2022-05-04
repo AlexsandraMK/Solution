@@ -12,6 +12,7 @@ class IKE
 public:
 	vector<int> globalNumsKnots;
 	double lambda, sigma, hi;
+	int iCoeff;
 	
 	virtual void SetGlobalKnotNum(int numKnot, Knot coordinatesKnot) = 0;
 	/*void SetGlobalKnotNum(int numKnot, Knot coordinatesKnot)
