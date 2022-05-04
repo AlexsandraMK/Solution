@@ -4,10 +4,11 @@
 
 struct TimeGrid
 {
-    double start;	// Начальное время
+    double start;
+    double startAfterTime3;	// Начальное время
     double end;	// Конечное время
-    int nSteps;	// Количество шагов по времени
-    double k;	// Множитель для подсчета следующих шагов
+    int nStepsAfterTime3;	// Количество шагов по времени
+    double kAfterTime3;	// Множитель для подсчета следующих шагов
 };
 
 

@@ -131,7 +131,7 @@ void InitialData::ReadBounds(string pathFile)
 void InitialData::ReadTime(string pathFile)
 {
     ifstream in(pathFile);
-    in >> timeGrid->start >> timeGrid->end >> timeGrid->k >> timeGrid->nSteps;
+    in >> timeGrid->start >> timeGrid->startAfterTime3 >> timeGrid->end >> timeGrid->kAfterTime3 >> timeGrid->nStepsAfterTime3;
     in.close();
 }
 

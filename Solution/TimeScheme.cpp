@@ -7,17 +7,17 @@ TimeScheme::TimeScheme(InitialData* data)
     TimeGrid* timeGrid = data->timeGrid;
 
     // Подсчет начального шага
-    k = timeGrid->k;
-    h = timeGrid->end - timeGrid->start;
-    h = (k == 1) ? h / timeGrid->nSteps : h * (1. - k) / (1. - pow(k, timeGrid->nSteps));
+    k = timeGrid->kAfterTime3;
+    h = timeGrid->end - timeGrid->startAfterTime3;
+    h = (k == 1) ? h / timeGrid->nStepsAfterTime3 : h * (1. - k) / (1. - pow(k, timeGrid->nStepsAfterTime3));
 
 
     double SLAUsize = data->knots.size();
     time.resize(4);
     time[0] = timeGrid->start;
-    time[1] = time[0] + h;
-    time[2] = time[1] + h * k;
-    time[3] = time[2] + h * k * k;
+    time[1] = time[0] + (timeGrid->startAfterTime3 - timeGrid->start) / 2.;
+    time[2] = timeGrid->startAfterTime3;
+    time[3] = time[2] + h;
 
     q.resize(4);
     for (int j = 0; j < 3; j++)
@@ -26,8 +26,6 @@ TimeScheme::TimeScheme(InitialData* data)
         q[j].resize(SLAUsize);
         for (int i = 0; i < SLAUsize; i++) q[j][i] = GetU(data->knots[i], timeJ);
     }
-
-    h = h * k * k;
 }
 
 void TimeScheme::Next()
@@ -37,9 +35,9 @@ void TimeScheme::Next()
         time[i] = time[i + 1];
         q[i] = q[i + 1];
     }
-
-    time[3] = time[2] + h;
     h *= k;
+    time[3] = time[2] + h;
+
     vector<double> qNext;
     qNext.resize(q[0].size());
     q[3] = qNext;
