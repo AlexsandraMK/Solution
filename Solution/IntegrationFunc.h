@@ -1,4 +1,5 @@
 #include <functional>
+#include "InputFuncs.h"
 #include <vector>
 
 
@@ -13,3 +14,5 @@ enum NewAxis {
 };
 
 double Integrate(std::function<double(std::vector<double> integrationVar, int i, int j)> func, int i, int j);
+
+double Integrate(std::function<double(std::vector<double> integrationVar, int i, int j, axis a1, axis a2)> func, int i, int j, axis a1, axis a2);

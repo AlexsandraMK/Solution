@@ -38,6 +38,22 @@ double GetF(Knot coord, double time)
     return 0;
 }
 
+double GetFx(Knot coord, double time)
+{
+    return 0.;
+}
+
+double GetFy(Knot coord, double time)
+{
+    return 0.;
+}
+
+double GetFz(Knot coord, double time)
+{
+    return 0;
+}
+
+
 
 /// <summary>
 /// Вычисляет u
@@ -69,3 +85,18 @@ double GetU(Knot coord, double time)
         coord.z == 2.5) return 10/**std::sin(2*3.14 / 5 *time)*/;
     return 0;
 }
+
+double GetUx(Knot coord, double time)
+{
+    return 1.;
+};
+double GetUy(Knot coord, double time)
+{
+    return 1;
+};
+double GetUz(Knot coord, double time) 
+{
+    return 1;
+};
+
+

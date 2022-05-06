@@ -75,6 +75,28 @@ vector<vector<double>> Triangle::CalcLocalG()
 	return G;
 }
 
+vector<vector<double>> Triangle::CalcLocalG_aa(axis a1, axis a2)
+{
+	if (a1 != x && a1 != y || a2 != x && a2 != y) exit(1);
+
+	double area = CalcArea();
+	vector<vector<double>> alfaMatrix = CalcAlfaMatrix();
+	vector<vector<double>> G_aa;
+	G_aa.resize(COUNT_KNOTS);
+
+	for (int i = 0; i < COUNT_KNOTS; i++)
+	{
+		// Заполнение строки значением = площади треугольника
+		G_aa[i].resize(COUNT_KNOTS, area);
+		for (int j = 0; j < COUNT_KNOTS; j++)
+		{
+			G_aa[i][j] *= alfaMatrix[i][a1] * alfaMatrix[j][a2];
+		}
+	}
+
+	return G_aa;
+}
+
 vector<vector<double>> Triangle::CalcLocalM()
 {
 	double area = CalcArea();

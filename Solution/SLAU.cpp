@@ -7,7 +7,7 @@
 
 SLAU::SLAU(InitialData* data)
 {
-    int slauSize = data->knots.size();
+    slauSize = data->knots.size()*3;
     knots.resize(data->knots.size());
     for (int i = 0; i < data->knots.size(); i++)
         knots[i] = data->knots[i];
@@ -17,14 +17,58 @@ SLAU::SLAU(InitialData* data)
     for (int i = 0; i < slauSize; i++)
         A[i].resize(slauSize);
     q.resize(slauSize);
+    qx.resize(data->knots.size());
+    qy.resize(data->knots.size());
+    qz.resize(data->knots.size());
     u.resize(slauSize);
     d.resize(slauSize);
 
     M = AssemblingGlobalM(data);
+
+    
+
+    G_xx = AssemblingGlobalG_aa(data, x, x);
+    G_yy = AssemblingGlobalG_aa(data, y, y);
+    G_zz = AssemblingGlobalG_aa(data, z, z);
+    G_xy = AssemblingGlobalG_aa(data, x, y);
+    G_xz = AssemblingGlobalG_aa(data, x, z);
+    G_yz = AssemblingGlobalG_aa(data, y, z);
+
     /*WriteMatrix(M);*/
-    G = AssemblingGlobalG(data);
+    /*G = AssemblingGlobalG(data);*/
    /* WriteMatrix(G);*/
 }
+
+vector<vector<double>>  SLAU::AssemblingGlobalG_aa(InitialData* data, axis a1, axis a2)
+{
+    vector<vector<double>> globalMatrix;
+    int sizeGlobalMatrix = data->knots.size();
+    globalMatrix.resize(sizeGlobalMatrix);
+    for (int i = 0; i < sizeGlobalMatrix; i++)
+        globalMatrix[i].resize(sizeGlobalMatrix);
+
+    int nKEs = data->KEs.size();
+    for (int iKE = 0; iKE < nKEs; iKE++)
+    {
+        IKE* ke = data->KEs[iKE];
+        vector<vector<double>> localMatrix = ke->CalcLocalG();
+
+        int countKnotsInKe = ke->GetCountKnots();
+
+        for (int j = 0; j < countKnotsInKe; j++)
+        {
+            int globalJ = ke->globalNumsKnots[j];
+            for (int k = 0; k < countKnotsInKe; k++)
+            {
+                int globalK = ke->globalNumsKnots[k];
+                globalMatrix[globalJ][globalK] += localMatrix[j][k];
+            }
+        }
+    }
+
+    return globalMatrix;
+}
+
 
 void SLAU::LOC()
 {
@@ -150,15 +194,19 @@ void SLAU::CalcA(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
     vector<double> timeToCalc = scheme->time;
 
     int nKEs = data->KEs.size();
+    double density, Yung, Poisson;
+    double hi, sigma, lambda;
+
     for (int iKE = 0; iKE < nKEs; iKE++)
     {
         IKE* ke = data->KEs[iKE];
+        density = data->coeffs[ke->iCoeff].density;
+        Yung = data->coeffs[ke->iCoeff].Yung;
+        Poisson = data->coeffs[ke->iCoeff].Poisson;
 
-        double hi, sigma, lambda;
-        hi = data->coeffs[ke->iCoeff].density;
-        sigma = data->coeffs[ke->iCoeff].Poisson;
-        lambda = data->coeffs[ke->iCoeff].Yung;
-
+        hi = density;
+        sigma = Yung / (2. * (1. + Poisson));
+        lambda = Poisson * Yung / (1. + Poisson) / (1. - 2. * Poisson);
 
         int countKnots = ke->GetCountKnots();
         for (int j = 0; j < countKnots; j++)
@@ -166,19 +214,37 @@ void SLAU::CalcA(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
             int globalJ = ke->globalNumsKnots[j];
             for (int k = 0; k <countKnots; k++)
             {
-                int globalK = ke->globalNumsKnots[k];
-                // эллиптическая задача
-                /*A[globalJ][globalK] = ke->hi * M[globalJ][globalK] + ke->lambda * G[globalJ][globalK];*/
-                A[globalJ][globalK] =
+                int globalK = ke->globalNumsKnots[k] ;
+
+                A[globalJ * 3][globalK * 3] =
+                    (lambda + 2* sigma) * G_xx[globalJ][globalK] + 
+                    sigma * G_yy[globalJ][globalK] +
+                    sigma * G_zz[globalJ][globalK] -
                     hi * M[globalJ][globalK] *
                     2 * ((timeToCalc[3] - timeToCalc[2]) + (timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[0]))
-                    / ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) +
-                    sigma * M[globalJ][globalK]
-                    * ((timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])
-                    +  (timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[2])
-                    +  (timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]))
-                    / ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) +
-                    lambda * G[globalJ][globalK];
+                    / ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2]));
+                
+                A[globalJ * 3 +1][globalK * 3 +1] =
+                    (lambda + 2 * sigma) * G_yy[globalJ][globalK] +
+                    sigma * G_xx[globalJ][globalK] +
+                    sigma * G_zz[globalJ][globalK] -
+                    hi * M[globalJ][globalK] *
+                    2 * ((timeToCalc[3] - timeToCalc[2]) + (timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[0]))
+                    / ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2]));
+                
+                A[globalJ * 3 +2][globalK * 3 +2] =
+                    (lambda + 2 * sigma) * G_zz[globalJ][globalK] +
+                    sigma * G_xx[globalJ][globalK] +
+                    sigma * G_yy[globalJ][globalK] -
+                    hi * M[globalJ][globalK] *
+                    2 * ((timeToCalc[3] - timeToCalc[2]) + (timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[0]))
+                    / ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2]));
+               
+                A[globalJ * 3][globalK * 3 +1] = (lambda + sigma) * G_xy[globalJ][globalK];
+                
+                A[globalJ * 3][globalK * 3 + 2] = (lambda + sigma) * G_xz[globalJ][globalK];
+               
+                A[globalJ * 3 + 1][globalK * 3 + 2] = (lambda + sigma) * G_yz[globalJ][globalK];
             }
 
         }
@@ -197,40 +263,56 @@ void SLAU::CalcD(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
 
     vector<double> b = AssemblingGlobalF(data, timeToCalc[3]);
 
-    vector<double>Mq_j3, Mq_j2, Mq_j1;
+    vector<double>Mq_j3x, Mq_j2x, Mq_j1x, Mq_j3y, Mq_j2y, Mq_j1y, Mq_j3z, Mq_j2z, Mq_j1z;
 
-    Mq_j3 = MultMatrByVect(M, scheme->q[0]);
-    Mq_j2 = MultMatrByVect(M, scheme->q[1]);
-    Mq_j1 = MultMatrByVect(M, scheme->q[2]);
+    Mq_j3x = MultMatrByVect(M, scheme->qx[0]);
+    Mq_j2x = MultMatrByVect(M, scheme->qx[1]);
+    Mq_j1x = MultMatrByVect(M, scheme->qx[2]);
+    Mq_j3y = MultMatrByVect(M, scheme->qy[0]);
+    Mq_j2y = MultMatrByVect(M, scheme->qy[1]);
+    Mq_j1y = MultMatrByVect(M, scheme->qy[2]);
+    Mq_j3z = MultMatrByVect(M, scheme->qz[0]);
+    Mq_j2z = MultMatrByVect(M, scheme->qz[1]);
+    Mq_j1z = MultMatrByVect(M, scheme->qz[2]);
+    double density;
+    double hi;
 
     int nKEs = data->KEs.size();
     for (int iKE = 0; iKE < nKEs; iKE++)
     {
         IKE* ke = data->KEs[iKE];
 
-        double hi, sigma, lambda;
-        hi = data->coeffs[ke->iCoeff].density;
-        sigma = data->coeffs[ke->iCoeff].Poisson;
-        lambda = data->coeffs[ke->iCoeff].Yung;
+        density = data->coeffs[ke->iCoeff].density;
+        hi = density;
 
         int countKnots = ke->GetCountKnots();
         for (int j = 0; j < countKnots; j++)
         {
             int globalJ = ke->globalNumsKnots[j];
             /*d[globalJ] = b[globalJ];*/
-            d[globalJ] = b[globalJ]
-                - sigma * Mq_j3[globalJ] * ((timeToCalc[3] - timeToCalc[1]) * (timeToCalc[3] - timeToCalc[2])) /
-                                           ((timeToCalc[0] - timeToCalc[1]) * (timeToCalc[0] - timeToCalc[2]) * (timeToCalc[0] - timeToCalc[3]))
-                - sigma * Mq_j2[globalJ] * ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[2])) /
-                                           ((timeToCalc[1] - timeToCalc[0]) * (timeToCalc[1] - timeToCalc[2]) * (timeToCalc[1] - timeToCalc[3]))
-                - sigma * Mq_j1[globalJ] * ((timeToCalc[3] - timeToCalc[0]) * (timeToCalc[3] - timeToCalc[1])) /
-                                                ((timeToCalc[2] - timeToCalc[0]) * (timeToCalc[2] - timeToCalc[1]) * (timeToCalc[2] - timeToCalc[3]))
-                - hi * Mq_j3[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[2])) /
+            d[globalJ*3] = b[globalJ*3]
+                + hi * Mq_j3x[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[2])) /
                                                 ((timeToCalc[0] - timeToCalc[3]) * (timeToCalc[0] - timeToCalc[1]) * (timeToCalc[0] - timeToCalc[2]))
-                - hi * Mq_j2[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[0]) + (timeToCalc[3] - timeToCalc[2])) /
+                + hi * Mq_j2x[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[0]) + (timeToCalc[3] - timeToCalc[2])) /
                                                 ((timeToCalc[1] - timeToCalc[0]) * (timeToCalc[1] - timeToCalc[2]) * (timeToCalc[1] - timeToCalc[3]))
-                - hi * Mq_j1[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[0])) /
+                + hi * Mq_j1x[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[0])) /
                                                 ((timeToCalc[2] - timeToCalc[0]) * (timeToCalc[2] - timeToCalc[1]) * (timeToCalc[2] - timeToCalc[3]));
+
+            d[globalJ * 3 + 1] = b[globalJ * 3 + 1]
+                + hi * Mq_j3y[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[2])) /
+                ((timeToCalc[0] - timeToCalc[3]) * (timeToCalc[0] - timeToCalc[1]) * (timeToCalc[0] - timeToCalc[2]))
+                + hi * Mq_j2y[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[0]) + (timeToCalc[3] - timeToCalc[2])) /
+                ((timeToCalc[1] - timeToCalc[0]) * (timeToCalc[1] - timeToCalc[2]) * (timeToCalc[1] - timeToCalc[3]))
+                + hi * Mq_j1y[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[0])) /
+                ((timeToCalc[2] - timeToCalc[0]) * (timeToCalc[2] - timeToCalc[1]) * (timeToCalc[2] - timeToCalc[3]));
+
+            d[globalJ * 3 + 2] = b[globalJ * 3 + 2]
+                + hi * Mq_j3z[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[2])) /
+                ((timeToCalc[0] - timeToCalc[3]) * (timeToCalc[0] - timeToCalc[1]) * (timeToCalc[0] - timeToCalc[2]))
+                + hi * Mq_j2z[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[0]) + (timeToCalc[3] - timeToCalc[2])) /
+                ((timeToCalc[1] - timeToCalc[0]) * (timeToCalc[1] - timeToCalc[2]) * (timeToCalc[1] - timeToCalc[3]))
+                + hi * Mq_j1z[globalJ] * 2 * ((timeToCalc[3] - timeToCalc[1]) + (timeToCalc[3] - timeToCalc[0])) /
+                ((timeToCalc[2] - timeToCalc[0]) * (timeToCalc[2] - timeToCalc[1]) * (timeToCalc[2] - timeToCalc[3]));
         }
     }
 
@@ -240,25 +322,34 @@ void SLAU::CalcD(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
 vector<double> SLAU::AssemblingGlobalF(InitialData* data, double time)
 {
     vector<double> f;
-    f.resize(data->knots.size());
+    f.resize(data->knots.size()*3);
     int nKEs = data->KEs.size();
     for (int iKE = 0; iKE < nKEs; iKE++)
     {
         IKE* ke = data->KEs[iKE];
         int countKnotsInKe = ke->GetCountKnots();
-        vector<double> fInKnots;
-        fInKnots.resize(ke->GetCountKnots());
+        vector<double> fInKnotsX, fInKnotsY, fInKnotsZ;
+        fInKnotsX.resize(ke->GetCountKnots());
+        fInKnotsY.resize(ke->GetCountKnots());
+        fInKnotsZ.resize(ke->GetCountKnots());
         for (int j = 0; j < countKnotsInKe; j++)
         {
             int globalJ = ke->globalNumsKnots[j];
-            fInKnots[j] = GetF(data->knots[globalJ], time);
+            fInKnotsX[j] = GetFx(data->knots[globalJ], time);
+            fInKnotsY[j] = GetFy(data->knots[globalJ], time);
+            fInKnotsZ[j] = GetFz(data->knots[globalJ], time);
         }
 
-        vector<double> localF = ke->CalcLocalF(fInKnots);
+        vector<double> localFx = ke->CalcLocalF(fInKnotsX);
+        vector<double> localFy = ke->CalcLocalF(fInKnotsY);
+        vector<double> localFz = ke->CalcLocalF(fInKnotsZ);
+
         for (int j = 0; j < countKnotsInKe; j++)
         {
-            int globalJ = ke->globalNumsKnots[j];
-            f[globalJ] += localF[j];
+            int globalJ = ke->globalNumsKnots[j]*3;
+            f[globalJ] += localFx[j];
+            f[globalJ+1] += localFy[j];
+            f[globalJ+2] += localFz[j];
         }
     }
 
@@ -271,14 +362,21 @@ void SLAU::CalcFirstBoundaryConditions(InitialData* data, double time)
     {
         for (int j = 0; j < 4; j++)
         {
-            int global_num_coord = data->bounds[i].globalNum[j];
+            int global_num_coord = data->bounds[i].globalNum[j]*3;
             for (int k = 0; k < data->knots.size(); k++)
             {
-                A[global_num_coord][k] = 0;
+                for(int r1 = 0; r1 <3; r1++)
+                    for (int r2 = 0; r2 < 3; r2++)
+                        A[global_num_coord + r1][k*3 + r2] = 0;
             }
 
             A[global_num_coord][global_num_coord] = 1.;
-            d[global_num_coord] = u[global_num_coord];
+            A[global_num_coord + 1][global_num_coord + 1] = 1.;
+            A[global_num_coord + 2][global_num_coord + 2] = 1.;
+            d[global_num_coord ] = u[global_num_coord];
+            d[global_num_coord +1] = u[global_num_coord+1];
+            d[global_num_coord+2] = u[global_num_coord+2];
+
             //d[global_num_coord] = 0.;     // Для решения
 
 
@@ -292,9 +390,9 @@ void SLAU::CalcFirstBoundaryConditions(InitialData* data, double time)
 
 void SLAU::SolveSLAU(InitialData* data, TimeScheme* scheme)
 {
-    u.resize(data->knots.size(), 0.);
-    d.resize(data->knots.size(), 0.);
-    for (int i = 0; i < data->knots.size(); i++) A[i].resize(data->knots.size(), 0.);
+    u.resize(slauSize, 0.);
+    d.resize(slauSize, 0.);
+    for (int i = 0; i < slauSize; i++) A[i].resize(slauSize, 0.);
 
 
     CalcU(data, scheme->time[scheme->time.size() - 1]);
@@ -303,14 +401,24 @@ void SLAU::SolveSLAU(InitialData* data, TimeScheme* scheme)
     CalcFirstBoundaryConditions(data, scheme->time[scheme->time.size() - 1]);
     //WriteMatrix(A);
     LOC();
+
+    for (int i = 0; i < data->knots.size(); i++)
+    {
+        qx[i] = q[i * 3];
+        qy[i] = q[i * 3 + 1];
+        qz[i] = q[i * 3 + 2];
+    }
+
 }
 
 void SLAU::CalcU(InitialData* data, double time)
 {
-    int slauSize = u.size();
+    int slauSize = u.size() / 3;
     for (int j = 0; j < slauSize; j++)
     {
-        u[j] = GetU(data->knots[j], time);
+        u[j*3] = GetUx(data->knots[j], time);
+        u[j*3+1] = GetUy(data->knots[j], time);
+        u[j*3+2] = GetUz(data->knots[j], time);
     }
 }
 
@@ -397,13 +505,13 @@ void SLAU::WriteResultForTest(vector<double> q, double time) //функция вывода в 
         out.setf(ios::left);
         out << "| ";
         out.width(15);
-        out << i + 1 << "| ";
+        out << i%3 + 1 << "| ";
         out.width(15);
-        out << knots[i].x << "| ";
+        out << knots[i%3].x << "| ";
         out.width(15);
-        out << knots[i].y << "| ";
+        out << knots[i%3].y << "| ";
         out.width(15);
-        out << knots[i].z << "| ";
+        out << knots[i%3].z << "| ";
         out.width(15);
         out << q[i] << "| ";
         out.width(15);

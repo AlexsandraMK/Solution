@@ -19,12 +19,28 @@ TimeScheme::TimeScheme(InitialData* data)
     time[2] = timeGrid->startAfterTime3;
     time[3] = time[2] + h;
 
-    q.resize(4);
+    qx.resize(4);
     for (int j = 0; j < 3; j++)
     {
         double timeJ = time[j];
-        q[j].resize(SLAUsize);
-        for (int i = 0; i < SLAUsize; i++) q[j][i] = GetU(data->knots[i], timeJ);
+        qx[j].resize(SLAUsize);
+        for (int i = 0; i < SLAUsize; i++) qx[j][i] = GetUx(data->knots[i], timeJ);
+    }
+
+    qy.resize(4);
+    for (int j = 0; j < 3; j++)
+    {
+        double timeJ = time[j];
+        qy[j].resize(SLAUsize);
+        for (int i = 0; i < SLAUsize; i++) qy[j][i] = GetUy(data->knots[i], timeJ);
+    }
+
+    qz.resize(4);
+    for (int j = 0; j < 3; j++)
+    {
+        double timeJ = time[j];
+        qz[j].resize(SLAUsize);
+        for (int i = 0; i < SLAUsize; i++) qz[j][i] = GetUz(data->knots[i], timeJ);
     }
 }
 
@@ -33,12 +49,23 @@ void TimeScheme::Next()
     for (int i = 0; i < 3; i++)
     {
         time[i] = time[i + 1];
-        q[i] = q[i + 1];
+        //q[i] = q[i + 1];
+        qx[i] = qx[i + 1];
+        qy[i] = qy[i + 1];
+        qz[i] = qz[i + 1];
     }
+
+
     h *= k;
     time[3] = time[2] + h;
 
-    vector<double> qNext;
-    qNext.resize(q[0].size());
-    q[3] = qNext;
+    vector<double> qNext, qxNext, qyNext, qzNext;
+    //qNext.resize(q[0].size());
+    //q[3] = qNext;
+    qxNext.resize(qx[0].size());
+    qx[3] = qxNext;
+    qyNext.resize(qy[0].size());
+    qy[3] = qyNext;
+    qzNext.resize(qz[0].size());
+    qz[3] = qzNext;
 }

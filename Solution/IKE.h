@@ -3,6 +3,7 @@
 #include "IntegrationFunc.h"
 #include "Knot.h"
 #include <string>
+#include "InputFuncs.h"
 using namespace std;
 
 
@@ -26,6 +27,12 @@ public:
 	/// Вычисляет локальную матрицу Г без влияния параметров среды
 	/// </summary>
 	virtual vector<vector<double>> CalcLocalG() = 0;
+
+	/// <summary>
+	/// Вычисляет локальные матрицы g без влияния параметров среды
+	/// </summary>
+	virtual vector<vector<double>> CalcLocalG_aa(axis a1, axis a2) = 0;
+
 
 	/// <summary>
 	/// Вычисляет локальную матрицу М без влияния параметров среды
@@ -69,6 +76,7 @@ public:
 	Triangle();
 	int GetCountKnots();
 	vector<vector<double>> CalcLocalG();
+	vector<vector<double>> CalcLocalG_aa(axis a1, axis a2);
 	vector<vector<double>> CalcLocalM();
 
 	double CountBasis(int ind, double x, double y);
@@ -102,6 +110,7 @@ public:
 	TriangularPrism();
 	int GetCountKnots();
 	vector<vector<double>> CalcLocalG();
+	vector<vector<double>> CalcLocalG_aa(axis a1, axis a2);
 	double SolveInPoint(Knot knot, vector<double> q);
 	vector<vector<double>> CalcLocalM();
 	bool IsIn(Knot knot);
@@ -148,6 +157,26 @@ private:
 		return res; // Исправлено
 	};
 
+	function<double(vector<double> integrationVar, int, int, axis, axis)> Gij_aa = [this](vector<double> integrationVar, int i, int j, axis a1, axis a2)
+	{
+		vector<vector<double>> Jacobian = CalcJacobian(integrationVar);
+		double detJacobian = CalcDetMatrix(Jacobian);
+		vector<vector<double>> reversed_Jacobian = CalcReverseMatrixWithSize3(Jacobian);
+
+		vector<double> J_grad_i = MultMatrByVect(reversed_Jacobian, CalcGrad(i, integrationVar));
+		vector<double> J_grad_j = MultMatrByVect(reversed_Jacobian, CalcGrad(j, integrationVar));
+
+		vector<double> ea1, ea2;
+		ea1.resize(3,0.);
+		ea2.resize(3,0.);
+
+		ea1[a1] = 1.;
+		ea2[a2] = 1.;
+
+		double res = CalcScalar(J_grad_i, ea1)* CalcScalar(J_grad_j, ea2) * detJacobian;
+		return res; // Исправлено
+	};
+
 	vector<vector<double>> CalcJacobian(vector<double> integrationVar);
 
 	vector<double> CalcGrad(int ind, vector<double> integrationVar);
@@ -160,6 +189,7 @@ public:
 	int GetCountKnots();
 	Hexagon();
 	vector<vector<double>> CalcLocalG();
+	vector<vector<double>> CalcLocalG_aa(axis a1, axis a2);
 	vector<vector<double>> CalcLocalM();
 	double SolveInPoint(Knot knot, vector<double> q);
 	bool IsIn(Knot knot);
