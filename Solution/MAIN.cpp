@@ -25,10 +25,12 @@ int main()
 		slau->WriteResultForTest(slau->q, timeScheme->time[3]);
 		//slau->WriteResultForTest(slau->qy, timeScheme->time[3]);
 		//slau->WriteResultForTest(slau->qz, timeScheme->time[3]);
+
 		timeScheme->qx[3] = slau->qx;	
 		timeScheme->qy[3] = slau->qy;
 		timeScheme->qz[3] = slau->qz;
-		/*slau->SolveInAreaForTest(data, timeScheme->time[3]);*/
+
+		slau->SolveInAreaForTest(data, timeScheme->time[3]);
 		//slau->SolveInArea(data, timeScheme->time[3]);
 	}
 

@@ -41,16 +41,37 @@ double GetF(Knot coord, double time)
 double GetFx(Knot coord, double time)
 {
     return 0.;
+
+    return 1.;
+
+    //return 0.;
+    //return 2.;
+    //return 6. * time;
+    return 12. * time * time;
 }
 
 double GetFy(Knot coord, double time)
 {
     return 0.;
+
+    return 1.;
+
+    //return 0.;
+    //return 2.;
+    //return 6. * time;
+    return 12. * time * time; 
 }
 
 double GetFz(Knot coord, double time)
 {
-    return 0;
+    return 0.;
+
+    return 1.;
+
+    //return 0.;
+    //return 2.;
+    //return 6. * time;
+    return 12. * time * time;
 }
 
 
@@ -88,15 +109,51 @@ double GetU(Knot coord, double time)
 
 double GetUx(Knot coord, double time)
 {
-    return 1.;
+    Knot* center = new Knot(0., 0., 2.5);
+
+
+    if (time == 1. && (
+        coord.x == -0.28 && coord.y == 3.42901e-17 && coord.z == 2.5)
+        )
+        return 1.5*10e+14;
+    else return 0.;
+
+    //return 1.;
+    //return coord.x + coord.y + coord.z;
+
+    return coord.x * coord.x + coord.y * coord.y + coord.z * coord.z;
+
+    //return time ;
+    //return time * time;
+    //return time * time * time;
+    return time * time * time * time;
+    
 };
 double GetUy(Knot coord, double time)
 {
-    return 1;
+    return 0.;
+    //return 1.;
+    //return coord.x + coord.y+ coord.z;
+
+    return coord.x*coord.x + coord.y*coord.y + coord.z*coord.z;
+
+    //return time;
+    //return time * time;
+    //return time * time * time;
+    return time * time * time * time;
 };
 double GetUz(Knot coord, double time) 
 {
-    return 1;
+    return 0.;
+    //return 1.;
+    //return coord.x + coord.y + coord.z;
+
+    return coord.x * coord.x + coord.y * coord.y + coord.z * coord.z;
+
+    //return time;
+    //return time * time;
+    //return time * time * time;
+    return time * time * time * time;
 };
 
 

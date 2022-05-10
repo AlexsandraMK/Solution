@@ -9,15 +9,18 @@
 /// <return name="timeGrid">Сетка по времени</return>
 InitialData::InitialData()
 {
+    cout << "Чтение данных:\n";
     ReadCoordinates("cross.txt");
     ReadCoefficients("coeffs.txt");
-    //ReadKEs("TriangularPrism.txt");
+    ReadKEs("TriangularPrism.txt");
+    
     ReadKEs("Hexagon.txt");
 
     ReadBounds("FirstBounds.txt");
 
     timeGrid = new TimeGrid();
     ReadTime("grid_time.txt");
+    cout << "Чтение данных завершено.\n";
 }
 
 /// <summary>
@@ -27,12 +30,19 @@ InitialData::InitialData()
 /// <return name="knots">Координты узлов</return>
 void InitialData::ReadCoefficients(string pathFile)
 {
+    cout << "\tЧтение коэффициентов: ";
     ifstream in(pathFile);
+    if (!in.is_open())
+    {
+        cout << "\tфайл не открыт\n";
+        return;
+    }
     int nCoeffs;
     in >> nCoeffs;
     coeffs.resize(nCoeffs);
     for (int i = 0; i < nCoeffs; i++)  in >> coeffs[i].density >> coeffs[i].Yung >> coeffs[i].Poisson;
     in.close();
+    cout << "\tуспешно\n";
 }
 
 
@@ -43,12 +53,19 @@ void InitialData::ReadCoefficients(string pathFile)
 /// <return name="knots">Координты узлов</return>
 void InitialData::ReadCoordinates(string pathFile)
 {
+    cout << "\tЧтение координат: ";
     ifstream in(pathFile);
+    if (!in.is_open())
+    {
+        cout << "\tфайл не открыт\n";
+        return;
+    }
     int nKnots;
     in >> nKnots;
     knots.resize(nKnots);
     for (int i = 0; i < nKnots; i++)  in >> knots[i].x >> knots[i].y >> knots[i].z;
     in.close();
+    cout << "\tуспешно\n";
 }
 
 /// <summary>
@@ -59,9 +76,16 @@ void InitialData::ReadCoordinates(string pathFile)
 /// <return name="KEs">Конечные элементы</return>
 void InitialData::ReadKEs(string pathFile) // Узлы                
 {
+    cout << "\tЧтение конечных элементов (файл - " << pathFile << " ): " ;
     int indFirstKE = KEs.size();
 
-    ifstream in(pathFile);
+    ifstream in;
+    in.open(pathFile);
+    if (!in.is_open())
+    {
+        cout << "\tфайл не открыт\n";
+        return;
+    }
     int nKEsInFile;
     in >> nKEsInFile;     // Считываем количество конечных элементов
     KEs.resize(nKEsInFile + KEs.size()); // Инициализируем размерность массива, который хранит локальные области
@@ -100,6 +124,7 @@ void InitialData::ReadKEs(string pathFile) // Узлы
         KEs[iKE] = ke;
     }
     in.close();
+    cout << "\tуспешно\n";
 }
 
 
@@ -110,7 +135,13 @@ void InitialData::ReadKEs(string pathFile) // Узлы
 /// <return name="bounds">Границы</return>
 void InitialData::ReadBounds(string pathFile)
 {
+    cout << "\tЧтение границ: ";
     ifstream in(pathFile);
+    if (!in.is_open())
+    {
+        cout << "\tфайл не открыт\n";
+        return;
+    }
     int nBounds;
     in >> nBounds;
     bounds.resize(nBounds);
@@ -121,6 +152,7 @@ void InitialData::ReadBounds(string pathFile)
             in >> bounds[i].globalNum[j];
     }
     in.close();
+    cout << "\tуспешно\n";
 }
 
 /// <summary>
@@ -130,9 +162,16 @@ void InitialData::ReadBounds(string pathFile)
 /// <return name="timeGrid">Сетка по времени</return>
 void InitialData::ReadTime(string pathFile)
 {
+    cout << "\tЧтение времени: ";
     ifstream in(pathFile);
+    if (!in.is_open())
+    {
+        cout << "\tфайл не открыт\n";
+        return;
+    }
     in >> timeGrid->start >> timeGrid->startAfterTime3 >> timeGrid->end >> timeGrid->kAfterTime3 >> timeGrid->nStepsAfterTime3;
     in.close();
+    cout << "\tуспешно\n";
 }
 
 

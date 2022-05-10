@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <iostream>
+#include <string>
+#include <fstream>
 
 static std::vector<double> MultMatrByVect(std::vector< std::vector<double>> matrix, std::vector<double> _vector)
 {
@@ -106,4 +108,35 @@ static void SwapLinesInVector(std::vector<double> &vector, int l1, int l2)
 	double temp = vector[l1];
 	vector[l1] = vector[l2];
 	vector[l2] = temp;
+}
+
+
+static void WriteMatrix(std::vector< std::vector<double>> matrix, std::string pathFile)
+{
+	std::ofstream out(pathFile);
+
+	for (int i = 0; i < matrix.size(); i++)
+	{
+		for (int j = 0; j < matrix.size(); j++)
+			out << matrix[i][j] << " ";
+		out << "\n";
+	}
+
+	out.close();
+}
+
+
+static int ReadMatrix(std::vector< std::vector<double>> &matrix, std::string pathFile)
+{
+	std::ifstream in(pathFile);
+	if (!in.is_open()) return 1;
+
+	for (int i = 0; i < matrix.size(); i++)
+	{
+		for (int j = 0; j < matrix.size(); j++)
+			in >> matrix[i][j];
+	}
+
+	in.close();
+	return 0;
 }

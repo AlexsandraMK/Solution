@@ -140,7 +140,10 @@ private:
 	{
 		double detJacobian = CalcDetMatrix(CalcJacobian(integrationVar));
 
-		double res = CalcPhi(i, integrationVar) * CalcPhi(j, integrationVar) * detJacobian;
+		double phi_i = CalcPhi(i, integrationVar);
+		double phi_j = CalcPhi(j, integrationVar);
+
+		double res = phi_i * phi_j * detJacobian;
 		return res;
 	};
 

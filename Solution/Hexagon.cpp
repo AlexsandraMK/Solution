@@ -45,12 +45,8 @@ vector<vector<double>> Hexagon::CalcLocalG()
         for (int j = 0; j < COUNT_KNOTS; j++)
         {
             G[i][j] = Integrate(Gij, i, j);
-            cout << G[i][j] << " ";
         }
-        cout << endl;
-
     }
-    cout << endl;
 
     return G;
 }
@@ -67,12 +63,8 @@ vector<vector<double>> Hexagon::CalcLocalG_aa(axis a1, axis a2)
         for (int j = 0; j < COUNT_KNOTS; j++)
         {
             G[i][j] = Integrate(Gij_aa, i, j, a1, a2);
-            cout << G[i][j] << " ";
         }
-        cout << endl;
-
     }
-    cout << endl;
 
     return G;
 }

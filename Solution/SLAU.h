@@ -6,6 +6,8 @@ class SLAU
 public:
 	void SolveSLAU(InitialData* data, TimeScheme* scheme);
 	SLAU(InitialData* data);
+
+
 	
 	void WriteResultForSolution(vector<double> q, double time);
 	void WriteResultForTest(vector<double> q, double time);
@@ -15,6 +17,9 @@ public:
 	double SolveInPoint(InitialData* data, Knot knot);
 	vector<vector<double>> A;
 	vector<vector<double>> M;
+	vector<vector<double>> G_xx_sigma;
+	vector<vector<double>> G_yy_sigma;
+	vector<vector<double>> G_zz_sigma;
 	vector<vector<double>> G_xx;
 	vector<vector<double>> G_yy;
 	vector<vector<double>> G_zz;
@@ -34,7 +39,7 @@ protected:
 	void LOC();
 	vector<vector<double>> AssemblingGlobalM(InitialData* data);
 	vector<vector<double>> AssemblingGlobalG(InitialData* data);
-	vector<vector<double>> AssemblingGlobalG_aa(InitialData* data, axis a1, axis a2);
+	vector<vector<double>> AssemblingGlobalG_aa(InitialData* data, axis a1, axis a2, int iCoeff);
 	void CalcA(InitialData* data, TimeScheme* scheme);
 	void CalcD(InitialData* data, TimeScheme* scheme);
 	void CalcU(InitialData* data, double time);
