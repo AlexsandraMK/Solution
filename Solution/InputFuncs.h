@@ -1,6 +1,8 @@
 #pragma once
 #include "Knot.h"
 
+double time_to_go = 0.;
+
 double GetF(Knot coord, double time);
 double GetFx(Knot coord, double time);
 double GetFy(Knot coord, double time);

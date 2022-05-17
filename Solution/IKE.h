@@ -143,7 +143,7 @@ private:
 		double phi_i = CalcPhi(i, integrationVar);
 		double phi_j = CalcPhi(j, integrationVar);
 
-		double res = phi_i * phi_j * detJacobian;
+		double res = phi_i * phi_j * abs(detJacobian);
 		return res;
 	};
 
@@ -156,7 +156,7 @@ private:
 		vector<double> J_grad_i = MultMatrByVect(reversed_Jacobian, CalcGrad(i, integrationVar));
 		vector<double> J_grad_j = MultMatrByVect(reversed_Jacobian, CalcGrad(j, integrationVar));
 
-		double res = CalcScalar(J_grad_i, J_grad_j) *detJacobian;
+		double res = CalcScalar(J_grad_i, J_grad_j) * abs(detJacobian);
 		return res; // Исправлено
 	};
 
@@ -176,7 +176,7 @@ private:
 		ea1[a1] = 1.;
 		ea2[a2] = 1.;
 
-		double res = CalcScalar(J_grad_i, ea1)* CalcScalar(J_grad_j, ea2) * detJacobian;
+		double res = CalcScalar(J_grad_i, ea1)* CalcScalar(J_grad_j, ea2) * abs(detJacobian);
 		return res; // Исправлено
 	};
 

@@ -36,11 +36,12 @@ public:
     InitialData();
 
     void ReadCoefficients(string pathFile);
-
+    double ChangeCoordinates(vector<double> q);
 protected:
     void ReadCoordinates(string pathFile);
     void ReadKEs(string pathFile);
     void ReadBounds(string pathFile);
     void ReadTime(string pathFile);
+    
 };
 

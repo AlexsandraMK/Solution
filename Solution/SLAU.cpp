@@ -534,7 +534,7 @@ void SLAU::CalcU(InitialData* data, double time)
 
 void SLAU::WriteResultForSolution(vector<double> q, double time) //функци€ вывода в консоль
 {
-	ofstream out("Result.txt", ios_base::out | ios_base::app);
+	ofstream out("Result2.txt", ios_base::out | ios_base::app);
 
 	out << endl << "¬–≈ћя: " << time << endl;
 	out << endl << "–езультат в узлах (веса):" << endl;

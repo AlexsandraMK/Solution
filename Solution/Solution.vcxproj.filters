@@ -91,9 +91,6 @@
     <Text Include="grid_time.txt">
       <Filter>Файлы ресурсов</Filter>
     </Text>
-    <Text Include="Result.txt">
-      <Filter>Файлы ресурсов</Filter>
-    </Text>
     <Text Include="ResultForTest.txt">
       <Filter>Файлы ресурсов</Filter>
     </Text>

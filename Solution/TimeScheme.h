@@ -12,6 +12,7 @@ public:
     vector<vector<double>> qz;
     TimeScheme(InitialData* data);
     void Next();
+    void ChangeTimeScheme(vector<double> q);
 
 protected:
     double k;

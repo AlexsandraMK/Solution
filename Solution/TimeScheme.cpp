@@ -69,3 +69,19 @@ void TimeScheme::Next()
     qzNext.resize(qz[0].size());
     qz[3] = qzNext;
 }
+
+void TimeScheme::ChangeTimeScheme(vector<double> q)
+{
+    double num_knots = qx[0].size();
+
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < num_knots; j++)
+        {
+            qx[i][j] -= q[j * 3];
+            qy[i][j] -= q[j * 3 + 1];
+            qz[i][j] -= q[j * 3 + 2];
+        }
+    }
+
+}
