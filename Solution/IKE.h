@@ -81,6 +81,8 @@ public:
 
 	double CountBasis(int ind, double x, double y);
 
+	vector<vector<double>> CalcLocalMG(axis a);
+
 	double SolveInPoint(Knot knot, vector<double> q);
 
 
@@ -110,6 +112,10 @@ public:
 	TriangularPrism();
 	int GetCountKnots();
 	vector<vector<double>> CalcLocalG();
+	vector<vector<double>> CalcLocalG_aa_xx_yy_xy(axis a1, axis a2);
+	vector<vector<double>> CalcLocalG_aa_zz(axis a1, axis a2);
+	vector<vector<double>> CalcMGz();
+	vector<vector<double>> CalcLocalG_aa_xz_yz(axis a1, axis a2);
 	vector<vector<double>> CalcLocalG_aa(axis a1, axis a2);
 	double SolveInPoint(Knot knot, vector<double> q);
 	vector<vector<double>> CalcLocalM();

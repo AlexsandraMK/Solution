@@ -31,86 +31,86 @@ SLAU::SLAU(InitialData* data)
 	d.resize(slauSize);
 
 	CreateMatrix(M, knots.size());
-	if (ReadMatrix(M, "Mhi.txt"))
+	if (ReadMatrix(M, "./matrix/Mhi.txt"))
 	{
 		cout << "\tПодсчет матрицы Mhi:\n";
 		M = AssemblingGlobalM(data);
-		WriteMatrix(M, "Mhi.txt");
+		WriteMatrix(M, "./matrix/Mhi.txt");
 	}
 
 	CreateMatrix(G_xx, knots.size());
-	if (ReadMatrix(G_xx, "G_xx.txt"))
+	if (ReadMatrix(G_xx, "./matrix/G_xx.txt"))
 	{
 		cout << "\tПодсчет матрицы G_xx:\n";
 		G_xx = AssemblingGlobalG_aa(data, x, x, 0);
-		WriteMatrix(G_xx, "G_xx.txt");
+		WriteMatrix(G_xx, "./matrix/G_xx.txt");
 	}
 
 	CreateMatrix(G_yy, knots.size());
-	if (ReadMatrix(G_yy, "G_yy.txt"))
+	if (ReadMatrix(G_yy, "./matrix/G_yy.txt"))
 	{
 		cout << "\tПодсчет матрицы G_yy:\n";
 		G_yy = AssemblingGlobalG_aa(data, y, y, 0);
-		WriteMatrix(G_yy, "G_yy.txt");
+		WriteMatrix(G_yy, "./matrix/G_yy.txt");
 	}
 
 	CreateMatrix(G_zz, knots.size());
-	if (ReadMatrix(G_zz, "G_zz.txt"))
+	if (ReadMatrix(G_zz, "./matrix/G_zz.txt"))
 	{
 		cout << "\tПодсчет матрицы G_zz:\n";
 		G_zz = AssemblingGlobalG_aa(data, z, z, 0);
-		WriteMatrix(G_zz, "G_zz.txt");
+		WriteMatrix(G_zz, "./matrix/G_zz.txt");
 	}
 	
 	CreateMatrix(G_xx_sigma, knots.size());
-	if (ReadMatrix(G_xx_sigma, "G_xx_sigma.txt"))
+	if (ReadMatrix(G_xx_sigma, "./matrix/G_xx_sigma.txt"))
 	{
 
 		cout << "\tПодсчет матрицы G_xx_sigma:\n";
 		G_xx_sigma = AssemblingGlobalG_aa(data, x, x, 1);
-		WriteMatrix(G_xx_sigma, "G_xx_sigma.txt");
+		WriteMatrix(G_xx_sigma, "./matrix/G_xx_sigma.txt");
 	}
 
 	CreateMatrix(G_yy_sigma, knots.size());
-	if (ReadMatrix(G_yy_sigma, "G_yy_sigma.txt"))
+	if (ReadMatrix(G_yy_sigma, "./matrix/G_yy_sigma.txt"))
 	{
 		cout << "\tПодсчет матрицы G_yy_sigma:\n";
 		G_yy_sigma = AssemblingGlobalG_aa(data, y, y, 1);
-		WriteMatrix(G_yy_sigma, "G_yy_sigma.txt");
+		WriteMatrix(G_yy_sigma, "./matrix/G_yy_sigma.txt");
 	}
 
 
 	CreateMatrix(G_zz_sigma, knots.size());
-	if (ReadMatrix(G_zz_sigma, "G_zz_sigma.txt"))
+	if (ReadMatrix(G_zz_sigma, "./matrix/G_zz_sigma.txt"))
 	{
 		cout << "\tПодсчет матрицы G_zz_sigma:\n";
 		G_zz_sigma = AssemblingGlobalG_aa(data, z, z, 1);
-		WriteMatrix(G_zz_sigma, "G_zz_sigma.txt");
+		WriteMatrix(G_zz_sigma, "./matrix/G_zz_sigma.txt");
 	}
 	
 
 	CreateMatrix(G_xy, knots.size());
-	if (ReadMatrix(G_xy, "G_xy.txt"))
+	if (ReadMatrix(G_xy, "./matrix/G_xy.txt"))
 	{
 		cout << "\tПодсчет матрицы G_xy:\n";
 		G_xy = AssemblingGlobalG_aa(data, x, y, 0);
-		WriteMatrix(G_xy, "G_xy.txt");
+		WriteMatrix(G_xy, "./matrix/G_xy.txt");
 	}
 
 	CreateMatrix(G_xz, knots.size());
-	if (ReadMatrix(G_xz, "G_xz.txt"))
+	if (ReadMatrix(G_xz, "./matrix/G_xz.txt"))
 	{
 		cout << "\tПодсчет матрицы G_xz:\n";
 		G_xz = AssemblingGlobalG_aa(data, x, z, 0);
-		WriteMatrix(G_xz, "G_xz.txt");
+		WriteMatrix(G_xz, "./matrix/G_xz.txt");
 	}
 
 	CreateMatrix(G_yz, knots.size());
-	if (ReadMatrix(G_yz, "G_yz.txt"))
+	if (ReadMatrix(G_yz, "./matrix/G_yz.txt"))
 	{
 		cout << "\tПодсчет матрицы G_yz:\n";
 		G_yz = AssemblingGlobalG_aa(data, y, z, 0);
-		WriteMatrix(G_yz, "G_yz.txt");
+		WriteMatrix(G_yz, "./matrix/G_yz.txt");
 	}
 
 
@@ -131,7 +131,7 @@ vector<vector<double>>  SLAU::AssemblingGlobalG_aa(InitialData* data, axis a1, a
 	for (int iKE = 0; iKE < nKEs; iKE++)
 	{
 		IKE* ke = data->KEs[iKE];
-		vector<vector<double>> localMatrix = ke->CalcLocalG();
+		vector<vector<double>> localMatrix = ke->CalcLocalG_aa(a1,a2);
 		double sigma = data->coeffs[ke->iCoeff].Yung / (2. * (1. + data->coeffs[ke->iCoeff].Poisson));
 		double lambda = data->coeffs[ke->iCoeff].Poisson * data->coeffs[ke->iCoeff].Yung / (1. + data->coeffs[ke->iCoeff].Poisson) / (1. - 2. * data->coeffs[ke->iCoeff].Poisson);
 
@@ -172,6 +172,7 @@ void SLAU::LOC()
 	for (i = 0; i < slauSize; i++)
 		q[i] = 0.;
 	f = MultMatrByVect(A, q);
+	f = MultMatrByVect(A, q);
 
 	for (i = 0; i < slauSize; i++)
 		z[i] = r[i] = d[i] - f[i];
@@ -179,7 +180,7 @@ void SLAU::LOC()
 	p = MultMatrByVect(A, z);
 	nvzk = sqrt(CalcScalar(r, r)) / sqrt(CalcScalar(d, d));
 	unsigned int k;
-	for (k = 1; k < 100000 && nvzk > eps; k++)
+	for (k = 1; k < 10000 && nvzk > eps; k++)
 	{
 		lastnvzk = nvzk;
 		skp = CalcScalar(p, p);
@@ -201,9 +202,8 @@ void SLAU::LOC()
 		}
 
 		nvzk = sqrt(CalcScalar(r, r)) / sqrt(CalcScalar(d, d));
-		cout << "iteration: " << k << "\tНевязка:" << nvzk << endl;
 	}
-
+	cout << "iterations: " << k << "\tНевязка:" << nvzk << endl;
 	cout << "Вычисление СЛАУ закончено.\n\n\n";
 
 }
@@ -534,7 +534,7 @@ void SLAU::CalcU(InitialData* data, double time)
 
 void SLAU::WriteResultForSolution(vector<double> q, double time) //функция вывода в консоль
 {
-	ofstream out("Result2.txt", ios_base::out | ios_base::app);
+	ofstream out("./res/Result2.txt", ios_base::out | ios_base::app);
 
 	out << endl << "ВРЕМЯ: " << time << endl;
 	out << endl << "Результат в узлах (веса):" << endl;
@@ -588,7 +588,7 @@ void SLAU::WriteResultForSolution(vector<double> q, double time) //функция вывод
 
 void SLAU::WriteResultForTest(vector<double> q, double time) //функция вывода в консоль
 {
-	ofstream out("ResultForTest.txt", ios_base::out | ios_base::app);
+	ofstream out("./res/ResultForTest.txt", ios_base::out | ios_base::app);
 
 	out << endl << "ВРЕМЯ: " << time << endl;
 	out << "Результат в узлах (веса):" << endl;
@@ -678,9 +678,9 @@ void SLAU::SolveInAreaForTest(InitialData* data, double time)
 		z.insert(2.5/*zbeg + i * hz / nStepsInArea*/);
 	}
 
-	string str = "ResultAreaX" + std::to_string(time) + ".txt";
-	string str1 = "ResultAreaY" + std::to_string(time) + ".txt";
-	string str2 = "ResultAreaZ" + std::to_string(time) + ".txt";
+	string str = "./res/ResultAreaX" + std::to_string(time) + ".txt";
+	string str1 = "./res/ResultAreaY" + std::to_string(time) + ".txt";
+	string str2 = "./res/ResultAreaZ" + std::to_string(time) + ".txt";
 
 	ofstream out(str);
 	ofstream out1(str1);

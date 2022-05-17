@@ -90,7 +90,7 @@ vector<vector<double>> Triangle::CalcLocalG_aa(axis a1, axis a2)
 		G_aa[i].resize(COUNT_KNOTS, area);
 		for (int j = 0; j < COUNT_KNOTS; j++)
 		{
-			G_aa[i][j] *= alfaMatrix[i][a1] * alfaMatrix[j][a2];
+			G_aa[i][j] *= alfaMatrix[i][a1+1] * alfaMatrix[j][a2+1];
 		}
 	}
 
@@ -118,6 +118,23 @@ double Triangle::CountBasis(int ind, double x, double y)
 	vector<vector<double>> alpha = CalcAlfaMatrix();
 
 	return alpha[ind][0] + alpha[ind][1] * x + alpha[ind][2] * y;
+}
+
+
+vector<vector<double>> Triangle::CalcLocalMG(axis La)
+{
+	vector<vector<double>> alpha = CalcAlfaMatrix();
+	double area = CalcArea();
+	double mult = area / 3.;
+
+	vector<vector<double>> MG =
+	{
+		{mult * alpha[0][La + 1], mult * alpha[0][La + 1],  mult * alpha[0][La + 1]},
+		{mult * alpha[1][La + 1], mult * alpha[1][La + 1],  mult * alpha[1][La + 1]},
+		{mult * alpha[2][La + 1], mult * alpha[2][La + 1],  mult * alpha[2][La + 1]}
+	};
+
+	return MG;
 }
 
 double Triangle::SolveInPoint(Knot knot, vector<double> q)

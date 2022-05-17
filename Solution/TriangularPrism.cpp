@@ -129,10 +129,8 @@
         return G;
     }
 
-    vector<vector<double>> TriangularPrism::CalcLocalG_aa(axis a1, axis a2)
+    vector<vector<double>> TriangularPrism::CalcLocalG_aa_xx_yy_xy(axis a1, axis a2)
     {
-        if (a1 != x && a1 != y || a2 != x && a2 != y) exit(1);
-        if (base == NULL) CreateBase();
         vector<vector<double>> Gaa = base->CalcLocalG_aa(a1,a2);
         vector<vector<double>> Mz = CalcMz();
 
@@ -153,6 +151,84 @@
                 G[i][j] = Gaa[muI][muJ] * Mz[nuI][nuJ];
             }
         }
+
+        return G;
+    }
+
+    vector<vector<double>> TriangularPrism::CalcLocalG_aa_zz(axis a1, axis a2)
+    {
+        vector<vector<double>> Gz = CalcGz();
+        vector<vector<double>> Mxy = base->CalcLocalM();
+
+        vector<vector<double>> G;
+        G.resize(COUNT_KNOTS);
+        int muI = 0, muJ = 0, nuI = 0, nuJ = 0;
+
+        for (int i = 0; i < COUNT_KNOTS; i++)
+        {
+            G[i].resize(COUNT_KNOTS);
+            muI = CalcMu(i);
+            nuI = CalcNu(i);
+
+            for (int j = 0; j < COUNT_KNOTS; j++)
+            {
+                muJ = CalcMu(j);
+                nuJ = CalcNu(j);
+                G[i][j] = Mxy[muI][muJ] * Gz[nuI][nuJ];
+            }
+        }
+
+        return G;
+    }
+
+    vector<vector<double>> TriangularPrism::CalcMGz()
+    {
+        vector<vector<double>> Gz =
+        {
+            {1. / 2., -1. / 2.},
+            {-1. / 2., 1. / 2.},
+        };
+
+        return Gz;
+    }
+
+    vector<vector<double>> TriangularPrism::CalcLocalG_aa_xz_yz(axis a1, axis a2)
+    {
+        vector<vector<double>> MGz = CalcMGz();
+        vector<vector<double>> MGa = base->CalcLocalMG(a1);
+
+        vector<vector<double>> G;
+        G.resize(COUNT_KNOTS);
+        int muI = 0, muJ = 0, nuI = 0, nuJ = 0;
+
+        for (int i = 0; i < COUNT_KNOTS; i++)
+        {
+            G[i].resize(COUNT_KNOTS);
+            muI = CalcMu(i);
+            nuI = CalcNu(i);
+
+            for (int j = 0; j < COUNT_KNOTS; j++)
+            {
+                muJ = CalcMu(j);
+                nuJ = CalcNu(j);
+                G[i][j] = MGa[muI][muJ] * MGz[nuI][nuJ];
+            }
+        }
+
+        return G;
+    }
+
+
+
+    vector<vector<double>> TriangularPrism::CalcLocalG_aa(axis a1, axis a2)
+    {
+        if (base == NULL) CreateBase();
+
+        vector<vector<double>> G;
+        if (a1 == z && a2 == z) G = CalcLocalG_aa_zz(a1, a2);
+        else
+            if (a2 == z) G = CalcLocalG_aa_xz_yz(a1, a2);
+            else G = CalcLocalG_aa_xx_yy_xy(a1, a2);
 
         return G;
     }

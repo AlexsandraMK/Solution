@@ -114,7 +114,8 @@ static void SwapLinesInVector(std::vector<double> &vector, int l1, int l2)
 static void WriteMatrix(std::vector< std::vector<double>> matrix, std::string pathFile)
 {
 	std::ofstream out(pathFile);
-
+	out.precision(20);
+	out.setf(std::ios::fixed);
 	for (int i = 0; i < matrix.size(); i++)
 	{
 		for (int j = 0; j < matrix.size(); j++)
