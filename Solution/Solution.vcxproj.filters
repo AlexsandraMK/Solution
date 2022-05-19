@@ -97,5 +97,8 @@
     <Text Include="ResultArea.txt">
       <Filter>Файлы ресурсов</Filter>
     </Text>
+    <Text Include="res\ResultForTest.txt">
+      <Filter>Файлы ресурсов</Filter>
+    </Text>
   </ItemGroup>
 </Project>

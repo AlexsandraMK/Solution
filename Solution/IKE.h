@@ -162,7 +162,7 @@ private:
 		vector<double> J_grad_i = MultMatrByVect(reversed_Jacobian, CalcGrad(i, integrationVar));
 		vector<double> J_grad_j = MultMatrByVect(reversed_Jacobian, CalcGrad(j, integrationVar));
 
-		double res = CalcScalar(J_grad_i, J_grad_j) * abs(detJacobian);
+		double res = CalcScalar(J_grad_i, J_grad_j) * detJacobian;
 		return res; // Исправлено
 	};
 

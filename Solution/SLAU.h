@@ -47,4 +47,5 @@ protected:
 	vector<Knot> knots;
 	vector<double> AssemblingGlobalF(InitialData* data, double time);
 	void CalcFirstBoundaryConditions(InitialData* data, double time);
+	void Symmetrization(int i);
 };

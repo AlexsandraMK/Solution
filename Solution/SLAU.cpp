@@ -29,6 +29,14 @@ SLAU::SLAU(InitialData* data)
 	qz.resize(data->knots.size());
 	u.resize(slauSize);
 	d.resize(slauSize);
+	vector<vector<double>> G;
+	CreateMatrix(G, knots.size());
+	if (ReadMatrix(G, "./matrix/G.txt"))
+	{
+		cout << "\tПодсчет матрицы G:\n";
+		G = AssemblingGlobalG(data);
+		WriteMatrix(G, "./matrix/G.txt");
+	}
 
 	CreateMatrix(M, knots.size());
 	if (ReadMatrix(M, "./matrix/Mhi.txt"))
@@ -135,7 +143,7 @@ vector<vector<double>>  SLAU::AssemblingGlobalG_aa(InitialData* data, axis a1, a
 		double sigma = data->coeffs[ke->iCoeff].Yung / (2. * (1. + data->coeffs[ke->iCoeff].Poisson));
 		double lambda = data->coeffs[ke->iCoeff].Poisson * data->coeffs[ke->iCoeff].Yung / (1. + data->coeffs[ke->iCoeff].Poisson) / (1. - 2. * data->coeffs[ke->iCoeff].Poisson);
 
-		double coeff = iCoeff == 0 ? lambda + sigma : sigma;
+		double coeff = iCoeff == 0 ? /*0.*/lambda + sigma : /*0.*/sigma;
 
 		int countKnotsInKe = ke->GetCountKnots();
 
@@ -202,6 +210,7 @@ void SLAU::LOC()
 		}
 
 		nvzk = sqrt(CalcScalar(r, r)) / sqrt(CalcScalar(d, d));
+		if (k % 10000 == 0) cout << "iterations: " << k << "\tНевязка:" << nvzk << endl;
 	}
 	cout << "iterations: " << k << "\tНевязка:" << nvzk << endl;
 	cout << "Вычисление СЛАУ закончено.\n\n\n";
@@ -229,6 +238,8 @@ vector<vector<double>> SLAU::AssemblingGlobalM(InitialData* data)
 		double hi = data->coeffs[ke->iCoeff].density;
 
 		vector<vector<double>> localMatrix = ke->CalcLocalM();
+		string file = "./locals/localM" + std::to_string(iKE) + ".txt";
+		WriteMatrix(localMatrix, file);
 		int countKnotsInKe = ke->GetCountKnots();
 
 		for (int j = 0; j < countKnotsInKe; j++)
@@ -262,6 +273,10 @@ vector<vector<double>> SLAU::AssemblingGlobalG(InitialData* data)
 	{
 		IKE* ke = data->KEs[iKE];
 		vector<vector<double>> localMatrix = ke->CalcLocalG();
+		double sigma = data->coeffs[ke->iCoeff].Yung / (2. * (1. + data->coeffs[ke->iCoeff].Poisson));
+		double lambda = data->coeffs[ke->iCoeff].Poisson * data->coeffs[ke->iCoeff].Yung / (1. + data->coeffs[ke->iCoeff].Poisson) / (1. - 2. * data->coeffs[ke->iCoeff].Poisson);
+
+		double coeff = lambda + sigma;
 
 		int countKnotsInKe = ke->GetCountKnots();
 
@@ -271,7 +286,7 @@ vector<vector<double>> SLAU::AssemblingGlobalG(InitialData* data)
 			for (int k = 0; k < countKnotsInKe; k++)
 			{
 				int globalK = ke->globalNumsKnots[k];
-				globalMatrix[globalJ][globalK] += localMatrix[j][k];
+				globalMatrix[globalJ][globalK] += coeff * localMatrix[j][k];
 			}
 		}
 	}
@@ -325,15 +340,16 @@ void SLAU::CalcA(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
 	{
 		for (int j = 0; j < data->knots.size(); j++)
 		{
-			A[i * 3][j * 3] = G_xx[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
-				+ M[i][j] * CalcTimeCoeff4ForHi(scheme, 3);
+			//A[i * 3][j * 3] = G_xx[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
+			//	+ M[i][j] * CalcTimeCoeff4ForHi(scheme, 3);
 
-			A[i * 3 + 1][j * 3 + 1] = G_yy[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
-				+ M[i][j] * CalcTimeCoeff4ForHi(scheme, 3);
+			//A[i * 3 + 1][j * 3 + 1] = G_yy[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
+			//	+ M[i][j] * CalcTimeCoeff4ForHi(scheme, 3);
 
-			A[i * 3 + 2][j * 3 + 2] = G_zz[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
-				+ M[i][j] * CalcTimeCoeff4ForHi(scheme, 3);
-
+			//A[i * 3 + 2][j * 3 + 2] = G_zz[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
+			//	+ M[i][j] * CalcTimeCoeff4ForHi(scheme, 3);
+			//
+			//// Проверка на трехслойку
 			//A[i * 3][j * 3] = G_xx[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
 			//	+ M[i][j] * CalcTimeCoeff3ForHi(scheme, 3);
 
@@ -341,13 +357,20 @@ void SLAU::CalcA(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
 			//	+ M[i][j] * CalcTimeCoeff3ForHi(scheme, 3);
 
 			//A[i * 3 + 2][j * 3 + 2] = G_zz[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
-			//	+ M[i][j] * CalcTimeCoeff4ForHi(scheme, 3); M[i][j] * CalcTimeCoeff3ForHi(scheme, 3);
+			//	+ M[i][j] * CalcTimeCoeff3ForHi(scheme, 3); 
 
-			A[i * 3][j * 3 + 1] = A[i * 3 + 1][j * 3] = G_xy[i][j];
+			//A[i * 3][j * 3 + 1] = A[i * 3 + 1][j * 3] = G_xy[i][j];
 
-			A[i * 3][j * 3 + 2] = A[i * 3 + 2][j * 3] = G_xz[i][j];
+			//A[i * 3][j * 3 + 2] = A[i * 3 + 2][j * 3] = G_xz[i][j];
 
-			A[i * 3 + 1][j * 3 + 2] = A[i * 3 + 2][j * 3 + 1] = G_yz[i][j];
+			//A[i * 3 + 1][j * 3 + 2] = A[i * 3 + 2][j * 3 + 1] = G_yz[i][j];
+
+			// Проверка на эллиптическую
+			A[i * 3][j * 3] = G_xx[i][j] + G_yy[i][j] + G_zz[i][j] + M[i][j];
+
+			A[i * 3 + 1][j * 3 + 1] = G_xx[i][j] + G_yy[i][j] + G_zz[i][j] + M[i][j];
+
+			A[i * 3 + 2][j * 3 + 2] = G_xx[i][j] + G_yy[i][j] + G_zz[i][j] + M[i][j];
 		}
 	}
 
@@ -386,26 +409,27 @@ void SLAU::CalcD(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
 	{
 
 		/*d[i] = b[i];*/
-		d[i * 3] = b[i * 3]
-			- Mq_time0_x[i] * CalcTimeCoeff4ForHi(scheme, 0)
-			- Mq_time1_x[i] * CalcTimeCoeff4ForHi(scheme, 1)
-			- Mq_time2_x[i] * CalcTimeCoeff4ForHi(scheme, 2);
+		//d[i * 3] = b[i * 3]
+		//	- Mq_time0_x[i] * CalcTimeCoeff4ForHi(scheme, 0)
+		//	- Mq_time1_x[i] * CalcTimeCoeff4ForHi(scheme, 1)
+		//	- Mq_time2_x[i] * CalcTimeCoeff4ForHi(scheme, 2);
 
-		d[i * 3 + 1] = b[i * 3 + 1]
-			- Mq_time0_y[i] * CalcTimeCoeff4ForHi(scheme, 0)
-			- Mq_time1_y[i] * CalcTimeCoeff4ForHi(scheme, 1)
-			- Mq_time2_y[i] * CalcTimeCoeff4ForHi(scheme, 2);
+		//d[i * 3 + 1] = b[i * 3 + 1]
+		//	- Mq_time0_y[i] * CalcTimeCoeff4ForHi(scheme, 0)
+		//	- Mq_time1_y[i] * CalcTimeCoeff4ForHi(scheme, 1)
+		//	- Mq_time2_y[i] * CalcTimeCoeff4ForHi(scheme, 2);
 
-		d[i * 3 + 2] = b[i * 3 + 2]
-			- Mq_time0_z[i] * CalcTimeCoeff4ForHi(scheme, 0)
-			- Mq_time1_z[i] * CalcTimeCoeff4ForHi(scheme, 1)
-			- Mq_time2_z[i] * CalcTimeCoeff4ForHi(scheme, 2);
+		//d[i * 3 + 2] = b[i * 3 + 2]
+		//	- Mq_time0_z[i] * CalcTimeCoeff4ForHi(scheme, 0)
+		//	- Mq_time1_z[i] * CalcTimeCoeff4ForHi(scheme, 1)
+		//	- Mq_time2_z[i] * CalcTimeCoeff4ForHi(scheme, 2);
+
+
+
 
 		//d[i * 3] = b[i * 3]
 		//	- Mq_time2_x[i] * CalcTimeCoeff3ForHi(scheme, 2)
 		//	- Mq_time1_x[i] * CalcTimeCoeff3ForHi(scheme, 1);
-
-
 
 		//d[i * 3 + 1] = b[i * 3 + 1]
 		//	- Mq_time2_y[i] * CalcTimeCoeff3ForHi(scheme, 2)
@@ -414,6 +438,14 @@ void SLAU::CalcD(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
 		//d[i * 3 + 2] = b[i * 3 + 2]
 		//	- Mq_time2_z[i] * CalcTimeCoeff3ForHi(scheme, 2)
 		//	- Mq_time1_z[i] * CalcTimeCoeff3ForHi(scheme, 1);
+
+
+		// Проверка на эллиптическую
+		d[i * 3] = b[i*3];
+
+		d[i * 3 + 1] = b[i * 3 + 1];
+
+		d[i * 3 + 2] = b[i * 3 + 2];
 	}
 
 
@@ -424,6 +456,7 @@ vector<double> SLAU::AssemblingGlobalF(InitialData* data, double time)
 	vector<double> f;
 	f.resize(data->knots.size() * 3);
 	int nKEs = data->KEs.size();
+	string file;
 	for (int iKE = 0; iKE < nKEs; iKE++)
 	{
 		IKE* ke = data->KEs[iKE];
@@ -443,16 +476,23 @@ vector<double> SLAU::AssemblingGlobalF(InitialData* data, double time)
 		vector<double> localFx = ke->CalcLocalF(fInKnotsX);
 		vector<double> localFy = ke->CalcLocalF(fInKnotsY);
 		vector<double> localFz = ke->CalcLocalF(fInKnotsZ);
-
+		file = "./locals/localFx" + std::to_string(iKE) + ".txt";
+		WriteVector(localFx, file);
+		file = "./locals/localFy" + std::to_string(iKE) + ".txt";
+		WriteVector(localFy, file);
+		file = "./locals/localFz" + std::to_string(iKE) + ".txt";
+		WriteVector(localFz, file);
 		for (int j = 0; j < countKnotsInKe; j++)
 		{
 			int globalJ = ke->globalNumsKnots[j] * 3;
 			f[globalJ] += localFx[j];
 			f[globalJ + 1] += localFy[j];
 			f[globalJ + 2] += localFz[j];
+
 		}
 	}
-
+	file = "./vectors/b.txt";
+	WriteVector(f, file);
 	return f;
 }
 
@@ -477,18 +517,36 @@ void SLAU::CalcFirstBoundaryConditions(InitialData* data, double time)
 			d[global_num_coord + 1] = u[global_num_coord + 1];
 			d[global_num_coord + 2] = u[global_num_coord + 2];
 
+			Symmetrization(global_num_coord);
+			Symmetrization(global_num_coord + 1);
+			Symmetrization(global_num_coord + 2);
 			//d[global_num_coord] = 0.;     // Для решения
 
 
 			// БОЛШИМ ЧИСЛОМ
-			//A[global_num_coord][global_num_coord] = 10e+14;
-			//d[global_num_coord] = u[global_num_coord] * 10e+14;
-			//A[global_num_coord+1][global_num_coord+1] = 10e+14;
-			//d[global_num_coord+1] = u[global_num_coord+1] * 10e+14;
-			//A[global_num_coord+2][global_num_coord+2] = 10e+14;
-			//d[global_num_coord+2] = u[global_num_coord+2] * 10e+14;
+			//A[global_num_coord][global_num_coord] = 1e+13;
+			//d[global_num_coord] = u[global_num_coord] * 1e+13;
+			//A[global_num_coord+1][global_num_coord+1] = 1e+13;
+			//d[global_num_coord+1] = u[global_num_coord+1] * 1e+13;
+			//A[global_num_coord+2][global_num_coord+2] = 1e+13;
+			//d[global_num_coord+2] = u[global_num_coord+2] * 1e+13;
 			//d[global_num_coord] = 0.* 10e+14;     // Для решения
 		}
+	}
+}
+
+void SLAU::Symmetrization(int i)
+{
+	for (int j = 0; j < i; j++)
+	{
+		d[j] -= d[i] * A[j][i];
+		A[j][i] = 0;
+	}
+
+	for (int j = i+1; j < A.size(); j++)
+	{
+		d[j] -= d[i] * A[j][i];
+		A[j][i] = 0;
 	}
 }
 
@@ -507,6 +565,7 @@ void SLAU::SolveSLAU(InitialData* data, TimeScheme* scheme)
 
 	cout << "Учет первых краевых.\n";
 	CalcFirstBoundaryConditions(data, scheme->time[scheme->time.size() - 1]);
+	WriteMatrix(A, "./matrix/A.txt");
 	//WriteMatrix(A);
 
 	cout << "Решение СЛАУ\n";

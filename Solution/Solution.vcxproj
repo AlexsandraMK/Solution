@@ -165,6 +165,7 @@
     <Text Include="grid_time.txt" />
     <Text Include="ResultArea.txt" />
     <Text Include="ResultForTest.txt" />
+    <Text Include="res\ResultForTest.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
