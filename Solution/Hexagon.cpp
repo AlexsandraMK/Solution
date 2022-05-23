@@ -245,7 +245,7 @@ double Hexagon::SolveInPoint(Knot knot, vector<double> q)
         Jacobian[1].clear();
         Jacobian[2].clear();
         Jacobian.clear();
-
+        delete solver;
         F.clear();
     }
 

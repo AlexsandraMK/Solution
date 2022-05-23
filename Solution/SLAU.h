@@ -1,5 +1,6 @@
 #pragma once
 #include "TimeScheme.h"
+#include <set>
 
 class SLAU
 {
@@ -11,6 +12,8 @@ public:
 	
 	void WriteResultForSolution(vector<double> q, double time);
 	void WriteResultForTest(vector<double> q, double time);
+	void CreateArea(InitialData* data);
+	void FindIKeForArea(InitialData* data);
 	void SolveInAreaForTest(InitialData* data, double time);
 	void SolveInArea(InitialData* data, double time);
 	int FindIKe(InitialData* data, Knot* knot);
@@ -32,10 +35,12 @@ public:
 	vector<double> qz;
 	vector<double> d;
 	vector<double> u;
+	
 
 
 protected:
-
+	set<double> xArea, yArea, zArea;
+	vector<int> KnotsIKEs;
 	void LOC();
 	vector<vector<double>> AssemblingGlobalM(InitialData* data);
 	vector<vector<double>> AssemblingGlobalG(InitialData* data);

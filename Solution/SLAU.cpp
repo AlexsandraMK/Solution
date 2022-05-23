@@ -2,7 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include "InputFuncs.h"
-#include <set>
+
 
 void CreateMatrix(vector<vector<double>> &matrix, int size)
 {
@@ -29,14 +29,14 @@ SLAU::SLAU(InitialData* data)
 	qz.resize(data->knots.size());
 	u.resize(slauSize);
 	d.resize(slauSize);
-	vector<vector<double>> G;
-	CreateMatrix(G, knots.size());
-	if (ReadMatrix(G, "./matrix/G.txt"))
-	{
-		cout << "\tПодсчет матрицы G:\n";
-		G = AssemblingGlobalG(data);
-		WriteMatrix(G, "./matrix/G.txt");
-	}
+	//vector<vector<double>> G;
+	//CreateMatrix(G, knots.size());
+	//if (ReadMatrix(G, "./matrix/G.txt"))
+	//{
+	//	cout << "\tПодсчет матрицы G:\n";
+	//	G = AssemblingGlobalG(data);
+	//	WriteMatrix(G, "./matrix/G.txt");
+	//}
 
 	CreateMatrix(M, knots.size());
 	if (ReadMatrix(M, "./matrix/Mhi.txt"))
@@ -188,7 +188,7 @@ void SLAU::LOC()
 	p = MultMatrByVect(A, z);
 	nvzk = sqrt(CalcScalar(r, r)) / sqrt(CalcScalar(d, d));
 	unsigned int k;
-	for (k = 1; k < 10000 && nvzk > eps; k++)
+	for (k = 1; k < 10000000 && nvzk > eps; k++)
 	{
 		lastnvzk = nvzk;
 		skp = CalcScalar(p, p);
@@ -340,14 +340,14 @@ void SLAU::CalcA(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
 	{
 		for (int j = 0; j < data->knots.size(); j++)
 		{
-			//A[i * 3][j * 3] = G_xx[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
-			//	+ M[i][j] * CalcTimeCoeff4ForHi(scheme, 3);
+			A[i * 3][j * 3] = G_xx[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
+				+ M[i][j] * CalcTimeCoeff4ForHi(scheme, 3);
 
-			//A[i * 3 + 1][j * 3 + 1] = G_yy[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
-			//	+ M[i][j] * CalcTimeCoeff4ForHi(scheme, 3);
+			A[i * 3 + 1][j * 3 + 1] = G_yy[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
+				+ M[i][j] * CalcTimeCoeff4ForHi(scheme, 3);
 
-			//A[i * 3 + 2][j * 3 + 2] = G_zz[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
-			//	+ M[i][j] * CalcTimeCoeff4ForHi(scheme, 3);
+			A[i * 3 + 2][j * 3 + 2] = G_zz[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
+				+ M[i][j] * CalcTimeCoeff4ForHi(scheme, 3);
 			//
 			//// Проверка на трехслойку
 			//A[i * 3][j * 3] = G_xx[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
@@ -359,18 +359,18 @@ void SLAU::CalcA(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
 			//A[i * 3 + 2][j * 3 + 2] = G_zz[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
 			//	+ M[i][j] * CalcTimeCoeff3ForHi(scheme, 3); 
 
-			//A[i * 3][j * 3 + 1] = A[i * 3 + 1][j * 3] = G_xy[i][j];
+			A[i * 3][j * 3 + 1] = A[i * 3 + 1][j * 3] = G_xy[i][j];
 
-			//A[i * 3][j * 3 + 2] = A[i * 3 + 2][j * 3] = G_xz[i][j];
+			A[i * 3][j * 3 + 2] = A[i * 3 + 2][j * 3] = G_xz[i][j];
 
-			//A[i * 3 + 1][j * 3 + 2] = A[i * 3 + 2][j * 3 + 1] = G_yz[i][j];
+			A[i * 3 + 1][j * 3 + 2] = A[i * 3 + 2][j * 3 + 1] = G_yz[i][j];
 
 			// Проверка на эллиптическую
-			A[i * 3][j * 3] = G_xx[i][j] + G_yy[i][j] + G_zz[i][j] + M[i][j];
+			/*A[i * 3][j * 3] = G_xx[i][j] + G_yy[i][j] + G_zz[i][j] + M[i][j];
 
 			A[i * 3 + 1][j * 3 + 1] = G_xx[i][j] + G_yy[i][j] + G_zz[i][j] + M[i][j];
 
-			A[i * 3 + 2][j * 3 + 2] = G_xx[i][j] + G_yy[i][j] + G_zz[i][j] + M[i][j];
+			A[i * 3 + 2][j * 3 + 2] = G_xx[i][j] + G_yy[i][j] + G_zz[i][j] + M[i][j];*/
 		}
 	}
 
@@ -408,21 +408,20 @@ void SLAU::CalcD(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
 	for (int i = 0; i < data->knots.size(); i++)
 	{
 
-		/*d[i] = b[i];*/
-		//d[i * 3] = b[i * 3]
-		//	- Mq_time0_x[i] * CalcTimeCoeff4ForHi(scheme, 0)
-		//	- Mq_time1_x[i] * CalcTimeCoeff4ForHi(scheme, 1)
-		//	- Mq_time2_x[i] * CalcTimeCoeff4ForHi(scheme, 2);
+		d[i * 3] = b[i * 3]
+			- Mq_time0_x[i] * CalcTimeCoeff4ForHi(scheme, 0)
+			- Mq_time1_x[i] * CalcTimeCoeff4ForHi(scheme, 1)
+			- Mq_time2_x[i] * CalcTimeCoeff4ForHi(scheme, 2);
 
-		//d[i * 3 + 1] = b[i * 3 + 1]
-		//	- Mq_time0_y[i] * CalcTimeCoeff4ForHi(scheme, 0)
-		//	- Mq_time1_y[i] * CalcTimeCoeff4ForHi(scheme, 1)
-		//	- Mq_time2_y[i] * CalcTimeCoeff4ForHi(scheme, 2);
+		d[i * 3 + 1] = b[i * 3 + 1]
+			- Mq_time0_y[i] * CalcTimeCoeff4ForHi(scheme, 0)
+			- Mq_time1_y[i] * CalcTimeCoeff4ForHi(scheme, 1)
+			- Mq_time2_y[i] * CalcTimeCoeff4ForHi(scheme, 2);
 
-		//d[i * 3 + 2] = b[i * 3 + 2]
-		//	- Mq_time0_z[i] * CalcTimeCoeff4ForHi(scheme, 0)
-		//	- Mq_time1_z[i] * CalcTimeCoeff4ForHi(scheme, 1)
-		//	- Mq_time2_z[i] * CalcTimeCoeff4ForHi(scheme, 2);
+		d[i * 3 + 2] = b[i * 3 + 2]
+			- Mq_time0_z[i] * CalcTimeCoeff4ForHi(scheme, 0)
+			- Mq_time1_z[i] * CalcTimeCoeff4ForHi(scheme, 1)
+			- Mq_time2_z[i] * CalcTimeCoeff4ForHi(scheme, 2);
 
 
 
@@ -441,11 +440,11 @@ void SLAU::CalcD(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
 
 
 		// Проверка на эллиптическую
-		d[i * 3] = b[i*3];
+		/*d[i * 3] = b[i*3];
 
 		d[i * 3 + 1] = b[i * 3 + 1];
 
-		d[i * 3 + 2] = b[i * 3 + 2];
+		d[i * 3 + 2] = b[i * 3 + 2];*/
 	}
 
 
@@ -705,37 +704,66 @@ void SLAU::WriteResultForTest(vector<double> q, double time) //функция вывода в 
 	}
 }
 
-void SLAU::SolveInAreaForTest(InitialData* data, double time)
+void SLAU::CreateArea(InitialData* data)
 {
-	set<double> x, y, z;
-
 	for (int i = 0; i < knots.size(); i++)
 	{
-		x.insert(knots[i].x);
-		y.insert(knots[i].y);
-		z.insert(knots[i].z);
+		xArea.insert(knots[i].x);
+		yArea.insert(knots[i].y);
+		zArea.insert(knots[i].z);
 	}
 
-	double xbeg = *(x.begin());
-	double ybeg = *(y.begin());
-	double zbeg = *(z.begin());
+	double xbeg = *(xArea.begin());
+	double ybeg = *(yArea.begin());
+	double zbeg = *(zArea.begin());
 
-	double hx = *(--x.end()) - xbeg;
-	double hy = *(--y.end()) - ybeg;
-	double hz = *(--z.end()) - zbeg;
+	double hx = *(--xArea.end()) - xbeg;
+	double hy = *(--yArea.end()) - ybeg;
+	double hz = *(--zArea.end()) - zbeg;
 
-	//x.clear();
-	//y.clear();
-	z.clear();
+	//xArea.clear();
+	//yArea.clear();
+	zArea.clear();
 
-	int nStepsInArea = 25;
+	int nStepsInArea = 50;
 
 	for (int i = 1; i <= nStepsInArea; i++)
 	{
-		x.insert(xbeg + i * hx / nStepsInArea);
-		y.insert(ybeg + i * hy / nStepsInArea);
-		z.insert(2.5/*zbeg + i * hz / nStepsInArea*/);
+		xArea.insert(xbeg + i * hx / nStepsInArea);
+		yArea.insert(ybeg + i * hy / nStepsInArea);
+		zArea.insert(2.5/*zbeg + i * hz / nStepsInArea*/);
 	}
+
+
+}
+
+void SLAU::FindIKeForArea(InitialData* data)
+{
+	KnotsIKEs.resize(xArea.size() * yArea.size() * zArea.size());
+
+	int i = 0;
+	for (set<double> ::iterator iz = zArea.begin(); iz != zArea.end(); iz++)
+	{
+		for (set<double> ::iterator ix = xArea.begin(); ix != xArea.end(); ix++)
+		{
+			for (set<double> ::iterator iy = yArea.begin(); iy != yArea.end(); iy++, i++)
+			{
+				Knot* knot = new Knot(*ix, *iy, *iz);
+				KnotsIKEs[i] = FindIKe(data, knot);
+			}
+		}
+	}
+}
+
+void SLAU::SolveInAreaForTest(InitialData* data, double time)
+{
+
+	if (xArea.size() == 0 || yArea.size() == 0 || zArea.size() == 0)
+	{
+		CreateArea(data);
+		FindIKeForArea(data);
+	}
+	
 
 	string str = "./res/ResultAreaX" + std::to_string(time) + ".txt";
 	string str1 = "./res/ResultAreaY" + std::to_string(time) + ".txt";
@@ -747,21 +775,29 @@ void SLAU::SolveInAreaForTest(InitialData* data, double time)
 	double result_x, result_y, result_z;
 	double trueResult_x, trueResult_y, trueResult_z;
 	double diffResult_x, diffResult_y, diffResult_z;
-	int i = 0;
-	for (set<double> ::iterator iz = z.begin(); iz != z.end(); iz++)
-	{
-		for (set<double> ::iterator ix = x.begin(); ix != x.end(); ix++)
-		{
-			for (set<double> ::iterator iy = y.begin(); iy != y.end(); iy++, i++)
-			{
-				Knot* knot = new Knot(*ix, *iy, *iz);
-				int iKe = FindIKe(data, knot);
 
-				if (iKe >= 0)
+	int i = 0;
+	Knot* knot = new Knot();
+	set<double> ::iterator iz = zArea.begin();
+	for (; iz != zArea.end(); iz++)
+	{
+		set<double> ::iterator ix = xArea.begin();
+		for (; ix != xArea.end(); ix++)
+		{
+			set<double> ::iterator iy = yArea.begin();
+			for (; iy != yArea.end(); iy++, i++)
+			{
+				knot->x = *ix;
+				knot->y = *iy;
+				knot->z = *iz;
+
+				if (KnotsIKEs[i] >= 0)
 				{
-					result_x = data->KEs[iKe]->SolveInPoint(*knot, qx);
-					result_y = data->KEs[iKe]->SolveInPoint(*knot, qy);
-					result_z = data->KEs[iKe]->SolveInPoint(*knot, qz);
+					result_x = data->KEs[KnotsIKEs[i]]->SolveInPoint(*knot, qx);
+					result_y = data->KEs[KnotsIKEs[i]]->SolveInPoint(*knot, qy);
+					result_z = data->KEs[KnotsIKEs[i]]->SolveInPoint(*knot, qz);
+
+
 
 					out.setf(ios::left);
 					out1.setf(ios::left);
@@ -773,6 +809,7 @@ void SLAU::SolveInAreaForTest(InitialData* data, double time)
 					out << knot->x << " ";
 					out1 << knot->x << " ";
 					out2 << knot->x << " ";
+
 					out.width(15);
 					out1.width(15);
 					out2.width(15);
@@ -781,29 +818,55 @@ void SLAU::SolveInAreaForTest(InitialData* data, double time)
 					out2 << knot->y << " ";
 
 					out.width(15);
-
 					out << result_x << " ";
 
 					out1.width(15);
-
 					out1 << result_y << " ";
 
 					out2.width(15);
-
 					out2 << result_z << " ";
+
+
+					/*trueResult_x = GetUx(*knot, time);
+					trueResult_y = GetUy(*knot, time);
+					trueResult_z = GetUz(*knot, time);
+					diffResult_x = abs(trueResult_x - result_x);
+					diffResult_y = abs(trueResult_y - result_y);
+					diffResult_z = abs(trueResult_z - result_z);
+
+					out.width(15);
+					out << trueResult_x << " ";
+
+					out1.width(15);
+					out1 << trueResult_y << " ";
+
+					out2.width(15);
+					out2 << trueResult_z << " ";
+
+
+
+					out.width(15);
+					out << diffResult_x << " ";
+
+					out1.width(15);
+					out1 << diffResult_y << " ";
+
+					out2.width(15);
+					out2 << diffResult_z << " ";*/
 
 					out << endl;
 					out1 << endl;
 					out2 << endl;
 				}
-
-				delete knot;
 			}
+			
 		}
 
 	}
 
 	if (out.is_open())  out.close();
+	if (out1.is_open())  out1.close();
+	if (out2.is_open())  out2.close();
 }
 
 
