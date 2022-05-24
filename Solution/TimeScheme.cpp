@@ -24,7 +24,7 @@ TimeScheme::TimeScheme(InitialData* data)
     {
         double timeJ = time[j];
         qx[j].resize(SLAUsize);
-        for (int i = 0; i < SLAUsize; i++) qx[j][i] = GetUx(data->knots[i], timeJ);
+        for (int i = 0; i < SLAUsize; i++) qx[j][i] = GetUx(data->knots[i], timeJ, time[1]);
     }
 
     qy.resize(4);
@@ -32,7 +32,7 @@ TimeScheme::TimeScheme(InitialData* data)
     {
         double timeJ = time[j];
         qy[j].resize(SLAUsize);
-        for (int i = 0; i < SLAUsize; i++) qy[j][i] = GetUy(data->knots[i], timeJ);
+        for (int i = 0; i < SLAUsize; i++) qy[j][i] = GetUy(data->knots[i], timeJ, time[1]);
     }
 
     qz.resize(4);
@@ -40,7 +40,7 @@ TimeScheme::TimeScheme(InitialData* data)
     {
         double timeJ = time[j];
         qz[j].resize(SLAUsize);
-        for (int i = 0; i < SLAUsize; i++) qz[j][i] = GetUz(data->knots[i], timeJ);
+        for (int i = 0; i < SLAUsize; i++) qz[j][i] = GetUz(data->knots[i], timeJ, time[1]);
     }
 }
 

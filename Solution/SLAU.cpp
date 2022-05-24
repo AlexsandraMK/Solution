@@ -584,9 +584,9 @@ void SLAU::CalcU(InitialData* data, double time)
 	int slauSize = u.size() / 3;
 	for (int j = 0; j < slauSize; j++)
 	{
-		u[j * 3] = GetUx(data->knots[j], time);
-		u[j * 3 + 1] = GetUy(data->knots[j], time);
-		u[j * 3 + 2] = GetUz(data->knots[j], time);
+		u[j * 3] = GetUx(data->knots[j], time, 0);
+		u[j * 3 + 1] = GetUy(data->knots[j], time, 0);
+		u[j * 3 + 2] = GetUz(data->knots[j], time, 0);
 	}
 }
 
@@ -765,9 +765,9 @@ void SLAU::SolveInAreaForTest(InitialData* data, double time)
 	}
 	
 
-	string str = "./res/ResultAreaX" + std::to_string(time) + ".txt";
-	string str1 = "./res/ResultAreaY" + std::to_string(time) + ".txt";
-	string str2 = "./res/ResultAreaZ" + std::to_string(time) + ".txt";
+	string str = "./res/X/ResultAreaX" + std::to_string(time) + ".txt";
+	string str1 = "./res/Y/ResultAreaY" + std::to_string(time) + ".txt";
+	string str2 = "./res/Z/ResultAreaZ" + std::to_string(time) + ".txt";
 
 	ofstream out(str);
 	ofstream out1(str1);

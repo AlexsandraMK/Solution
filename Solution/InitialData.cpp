@@ -20,6 +20,7 @@ InitialData::InitialData()
 
 	timeGrid = new TimeGrid();
 	ReadTime("grid_time.txt");
+
 	cout << "Чтение данных завершено.\n";
 }
 
