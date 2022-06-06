@@ -1,170 +1,229 @@
-#include "SLAU.h"
+п»ї#include "SLAU.h"
 #include <iostream>
 #include <fstream>
 #include "InputFuncs.h"
 
 
-void CreateMatrix(vector<vector<double>> &matrix, int size)
-{
-	matrix.resize(size);
-	for (int i = 0; i < size; i++)
-		matrix[i].resize(size);
-};
 
-SLAU::SLAU(InitialData* data)
+
+
+
+
+
+FEM::FEM(InitialData* data)
 {
-	cout << "Создаем СЛАУ:\n";
+	cout << "РЎРѕР·РґР°РµРј РЎР›РђРЈ:\n";
 	slauSize = data->knots.size() * 3;
 	knots.resize(data->knots.size());
 	for (int i = 0; i < data->knots.size(); i++)
 		knots[i] = data->knots[i];
 
-
-	A.resize(slauSize);
-	for (int i = 0; i < slauSize; i++)
-		A[i].resize(slauSize);
+	A = new Block_3_SM(data);
 	q.resize(slauSize);
 	qx.resize(data->knots.size());
 	qy.resize(data->knots.size());
 	qz.resize(data->knots.size());
 	u.resize(slauSize);
 	d.resize(slauSize);
-	//vector<vector<double>> G;
-	//CreateMatrix(G, knots.size());
-	//if (ReadMatrix(G, "./matrix/G.txt"))
+
+
+	M = new NoBlockSM(data);
+	if (M->ReadSparseMatrix("./matrix/Mhi.txt"))
+	{
+		cout << "\tРџРѕРґСЃС‡РµС‚ РјР°С‚СЂРёС†С‹ Mhi:\n";
+		AssemblingGlobalM(M, data);
+		M->WriteSparseMatrix("./matrix/Mhi.txt");
+	}
+
+
+	//G_xx = new NoBlockSM(data);
+	//if (G_xx->ReadSparseMatrix( "./matrix/G_xx.txt"))
 	//{
-	//	cout << "\tПодсчет матрицы G:\n";
-	//	G = AssemblingGlobalG(data);
-	//	WriteMatrix(G, "./matrix/G.txt");
+	//	cout << "\tРџРѕРґСЃС‡РµС‚ РјР°С‚СЂРёС†С‹ G_xx:\n";
+	//	AssemblingGlobalG_aa(G_xx, data, x, x, 0);
+	//	G_xx->WriteSparseMatrix("./matrix/G_xx.txt");
 	//}
 
-	CreateMatrix(M, knots.size());
-	if (ReadMatrix(M, "./matrix/Mhi.txt"))
+	//G_yy = new NoBlockSM(data);
+	//if (G_yy->ReadSparseMatrix("./matrix/G_yy.txt"))
+	//{
+	//	cout << "\tРџРѕРґСЃС‡РµС‚ РјР°С‚СЂРёС†С‹ G_yy:\n";
+	//	AssemblingGlobalG_aa(G_yy, data, y, y, 0);
+	//	G_yy->WriteSparseMatrix("./matrix/G_yy.txt");
+	//}
+
+	//G_zz = new NoBlockSM(data);
+	//if (G_zz->ReadSparseMatrix("./matrix/G_zz.txt"))
+	//{
+	//	cout << "\tРџРѕРґСЃС‡РµС‚ РјР°С‚СЂРёС†С‹ G_zz:\n";
+	//	AssemblingGlobalG_aa(G_zz, data, z, z, 0);
+	//	G_zz->WriteSparseMatrix("./matrix/G_zz.txt");
+	//}
+	//
+	//G_xx_sigma = new NoBlockSM(data);
+	//if (G_xx_sigma->ReadSparseMatrix("./matrix/G_xx_sigma.txt"))
+	//{
+
+	//	cout << "\tРџРѕРґСЃС‡РµС‚ РјР°С‚СЂРёС†С‹ G_xx_sigma:\n";
+	//	AssemblingGlobalG_aa(G_xx_sigma, data, x, x, 1);
+	//	G_xx_sigma->WriteSparseMatrix("./matrix/G_xx_sigma.txt");
+	//}
+
+	//G_yy_sigma = new NoBlockSM(data);
+	//if (G_yy_sigma->ReadSparseMatrix("./matrix/G_yy_sigma.txt"))
+	//{
+	//	cout << "\tРџРѕРґСЃС‡РµС‚ РјР°С‚СЂРёС†С‹ G_yy_sigma:\n";
+	//	AssemblingGlobalG_aa(G_yy_sigma, data, y, y, 1);
+	//	G_yy_sigma->WriteSparseMatrix("./matrix/G_yy_sigma.txt");
+	//}
+
+	//G_zz_sigma = new NoBlockSM(data);
+	//if (G_zz_sigma->ReadSparseMatrix("./matrix/G_zz_sigma.txt"))
+	//{
+	//	cout << "\tРџРѕРґСЃС‡РµС‚ РјР°С‚СЂРёС†С‹ G_zz_sigma:\n";
+	//	AssemblingGlobalG_aa(G_zz_sigma, data, z, z, 1);
+	//	G_zz_sigma->WriteSparseMatrix("./matrix/G_zz_sigma.txt");
+	//}
+	//
+	//G_xy = new NoBlockSM(data);
+	//if (G_xy->ReadSparseMatrix("./matrix/G_xy.txt"))
+	//{
+	//	cout << "\tРџРѕРґСЃС‡РµС‚ РјР°С‚СЂРёС†С‹ G_xy:\n";
+	//	AssemblingGlobalG_aa(G_xy, data, x, y, 0);
+	//	G_xy->WriteSparseMatrix("./matrix/G_xy.txt");
+	//}
+
+	//G_xz = new NoBlockSM(data);
+	//if (G_xz->ReadSparseMatrix("./matrix/G_xz.txt"))
+	//{
+	//	cout << "\tРџРѕРґСЃС‡РµС‚ РјР°С‚СЂРёС†С‹ G_xz:\n";
+	//	AssemblingGlobalG_aa(G_xz, data, x, z, 0);
+	//	G_xz->WriteSparseMatrix("./matrix/G_xz.txt");
+	//}
+
+	//G_yz = new NoBlockSM(data);
+	//if (G_yz->ReadSparseMatrix("./matrix/G_yz.txt"))
+	//{
+	//	cout << "\tРџРѕРґСЃС‡РµС‚ РјР°С‚СЂРёС†С‹ G_yz:\n";
+	//	AssemblingGlobalG_aa(G_yz, data, y, z, 0);
+	//	G_yz->WriteSparseMatrix("./matrix/G_yz.txt");
+	//}
+	G = new Block_3_SM(data);
+	if (G->ReadSparseMatrix("./matrix/G.txt"))
 	{
-		cout << "\tПодсчет матрицы Mhi:\n";
-		M = AssemblingGlobalM(data);
-		WriteMatrix(M, "./matrix/Mhi.txt");
+		cout << "\tРџРѕРґСЃС‡РµС‚ РјР°С‚СЂРёС†С‹ G:\n";
+		AssemblingGlobalBlockG(G, data);
+		G->WriteSparseMatrix("./matrix/G.txt");
 	}
-
-	CreateMatrix(G_xx, knots.size());
-	if (ReadMatrix(G_xx, "./matrix/G_xx.txt"))
-	{
-		cout << "\tПодсчет матрицы G_xx:\n";
-		G_xx = AssemblingGlobalG_aa(data, x, x, 0);
-		WriteMatrix(G_xx, "./matrix/G_xx.txt");
-	}
-
-	CreateMatrix(G_yy, knots.size());
-	if (ReadMatrix(G_yy, "./matrix/G_yy.txt"))
-	{
-		cout << "\tПодсчет матрицы G_yy:\n";
-		G_yy = AssemblingGlobalG_aa(data, y, y, 0);
-		WriteMatrix(G_yy, "./matrix/G_yy.txt");
-	}
-
-	CreateMatrix(G_zz, knots.size());
-	if (ReadMatrix(G_zz, "./matrix/G_zz.txt"))
-	{
-		cout << "\tПодсчет матрицы G_zz:\n";
-		G_zz = AssemblingGlobalG_aa(data, z, z, 0);
-		WriteMatrix(G_zz, "./matrix/G_zz.txt");
-	}
-	
-	CreateMatrix(G_xx_sigma, knots.size());
-	if (ReadMatrix(G_xx_sigma, "./matrix/G_xx_sigma.txt"))
-	{
-
-		cout << "\tПодсчет матрицы G_xx_sigma:\n";
-		G_xx_sigma = AssemblingGlobalG_aa(data, x, x, 1);
-		WriteMatrix(G_xx_sigma, "./matrix/G_xx_sigma.txt");
-	}
-
-	CreateMatrix(G_yy_sigma, knots.size());
-	if (ReadMatrix(G_yy_sigma, "./matrix/G_yy_sigma.txt"))
-	{
-		cout << "\tПодсчет матрицы G_yy_sigma:\n";
-		G_yy_sigma = AssemblingGlobalG_aa(data, y, y, 1);
-		WriteMatrix(G_yy_sigma, "./matrix/G_yy_sigma.txt");
-	}
-
-
-	CreateMatrix(G_zz_sigma, knots.size());
-	if (ReadMatrix(G_zz_sigma, "./matrix/G_zz_sigma.txt"))
-	{
-		cout << "\tПодсчет матрицы G_zz_sigma:\n";
-		G_zz_sigma = AssemblingGlobalG_aa(data, z, z, 1);
-		WriteMatrix(G_zz_sigma, "./matrix/G_zz_sigma.txt");
-	}
-	
-
-	CreateMatrix(G_xy, knots.size());
-	if (ReadMatrix(G_xy, "./matrix/G_xy.txt"))
-	{
-		cout << "\tПодсчет матрицы G_xy:\n";
-		G_xy = AssemblingGlobalG_aa(data, x, y, 0);
-		WriteMatrix(G_xy, "./matrix/G_xy.txt");
-	}
-
-	CreateMatrix(G_xz, knots.size());
-	if (ReadMatrix(G_xz, "./matrix/G_xz.txt"))
-	{
-		cout << "\tПодсчет матрицы G_xz:\n";
-		G_xz = AssemblingGlobalG_aa(data, x, z, 0);
-		WriteMatrix(G_xz, "./matrix/G_xz.txt");
-	}
-
-	CreateMatrix(G_yz, knots.size());
-	if (ReadMatrix(G_yz, "./matrix/G_yz.txt"))
-	{
-		cout << "\tПодсчет матрицы G_yz:\n";
-		G_yz = AssemblingGlobalG_aa(data, y, z, 0);
-		WriteMatrix(G_yz, "./matrix/G_yz.txt");
-	}
-
-
-	/*WriteMatrix(M);*/
-	/*G = AssemblingGlobalG(data);*/
-   /* WriteMatrix(G);*/
 }
 
-vector<vector<double>>  SLAU::AssemblingGlobalG_aa(InitialData* data, axis a1, axis a2, int iCoeff)
+void FEM::AssemblingGlobalBlockG(Block_3_SM* globalMatrix, InitialData* data)
 {
-	vector<vector<double>> globalMatrix;
-	int sizeGlobalMatrix = data->knots.size();
-	globalMatrix.resize(sizeGlobalMatrix);
-	for (int i = 0; i < sizeGlobalMatrix; i++)
-		globalMatrix[i].resize(sizeGlobalMatrix);
-
+	double block[3][3]{};
 	int nKEs = data->KEs.size();
 	for (int iKE = 0; iKE < nKEs; iKE++)
 	{
 		IKE* ke = data->KEs[iKE];
-		vector<vector<double>> localMatrix = ke->CalcLocalG_aa(a1,a2);
+		vector<vector<double>> G_xx = ke->CalcLocalG_aa(x, x);
+		vector<vector<double>> G_xy = ke->CalcLocalG_aa(x, y);
+		vector<vector<double>> G_xz = ke->CalcLocalG_aa(x, z);
+		vector<vector<double>> G_yx = ke->CalcLocalG_aa(y, x);
+		vector<vector<double>> G_yy = ke->CalcLocalG_aa(y, y);
+		vector<vector<double>> G_yz = ke->CalcLocalG_aa(y, z);
+		vector<vector<double>> G_zx = ke->CalcLocalG_aa(z, x);
+		vector<vector<double>> G_zy = ke->CalcLocalG_aa(z, y);
+		vector<vector<double>> G_zz = ke->CalcLocalG_aa(z, z);
+
 		double sigma = data->coeffs[ke->iCoeff].Yung / (2. * (1. + data->coeffs[ke->iCoeff].Poisson));
 		double lambda = data->coeffs[ke->iCoeff].Poisson * data->coeffs[ke->iCoeff].Yung / (1. + data->coeffs[ke->iCoeff].Poisson) / (1. - 2. * data->coeffs[ke->iCoeff].Poisson);
-
-		double coeff = iCoeff == 0 ? /*0.*/lambda + sigma : /*0.*/sigma;
-
 		int countKnotsInKe = ke->GetCountKnots();
 
-		for (int j = 0; j < countKnotsInKe; j++)
+		for (int i = 0; i < countKnotsInKe; i++)
 		{
-			int globalJ = ke->globalNumsKnots[j];
-			for (int k = 0; k < countKnotsInKe; k++)
+			int globalI = ke->globalNumsKnots[i];
+			for (int j = 0; j < countKnotsInKe; j++)
 			{
-				int globalK = ke->globalNumsKnots[k];
-				globalMatrix[globalJ][globalK] += coeff * localMatrix[j][k];
+				int globalJ = ke->globalNumsKnots[j];
+				block[0][0] = (lambda + 2 * sigma) * G_xx[i][j] + sigma * (G_yy[i][j] + G_zz[i][j]);
+				block[0][1] = lambda * G_xy[i][j] + sigma * G_yx[i][j];
+				block[0][2] = lambda * G_xz[i][j] + sigma * G_zx[i][j];
+
+				block[1][0] = lambda * G_yx[i][j] + sigma * G_xy[i][j];
+				block[1][1] = (lambda + 2 * sigma) * G_yy[i][j] + sigma * (G_xx[i][j] + G_zz[i][j]);
+				block[1][2] = lambda * G_yz[i][j] + sigma * G_zy[i][j];
+				block[2][0] = lambda * G_zx[i][j] + sigma * G_xz[i][j];
+				block[2][1] = lambda * G_zy[i][j] + sigma * G_yz[i][j];
+				block[2][2] = (lambda + 2 * sigma) * G_zz[i][j] + sigma * (G_xx[i][j] + G_yy[i][j]);
+
+				globalMatrix->AddElement(globalI, globalJ, block);
 			}
 		}
 	}
+	
+}
 
-	return globalMatrix;
+void  FEM::AssemblingGlobalG_aa(NoBlockSM* globalMatrix, InitialData* data, axis a1, axis a2, int iCoeff)
+{
+	if (a1 == a2)
+	{
+		int nKEs = data->KEs.size();
+		for (int iKE = 0; iKE < nKEs; iKE++)
+		{
+			IKE* ke = data->KEs[iKE];
+			vector<vector<double>> localMatrix = ke->CalcLocalG_aa(a1, a2);
+			double sigma = data->coeffs[ke->iCoeff].Yung / (2. * (1. + data->coeffs[ke->iCoeff].Poisson));
+			double lambda = data->coeffs[ke->iCoeff].Poisson * data->coeffs[ke->iCoeff].Yung / (1. + data->coeffs[ke->iCoeff].Poisson) / (1. - 2. * data->coeffs[ke->iCoeff].Poisson);
+
+			double coeff = iCoeff == 0 ? lambda + sigma : sigma;
+			string file = "./locals/localG/localG" + std::to_string(iKE) + "_" + std::to_string(a1) + "_" + std::to_string(a2) + ".txt";
+			WriteMatrix(localMatrix, file);
+			int countKnotsInKe = ke->GetCountKnots();
+
+			for (int j = 0; j < countKnotsInKe; j++)
+			{
+				int globalJ = ke->globalNumsKnots[j];
+				for (int k = 0; k < countKnotsInKe; k++)
+				{
+					int globalK = ke->globalNumsKnots[k];
+					globalMatrix->AddElement(globalJ, globalK, coeff * localMatrix[j][k]);
+				}
+			}
+		}
+	}
+	else
+	{
+		int nKEs = data->KEs.size();
+		for (int iKE = 0; iKE < nKEs; iKE++)
+		{
+			IKE* ke = data->KEs[iKE];
+			vector<vector<double>> localMatrix = ke->CalcLocalG_aa(a1, a2);
+			vector<vector<double>> localMatrix2 = ke->CalcLocalG_aa(a2, a1);
+			double sigma = data->coeffs[ke->iCoeff].Yung / (2. * (1. + data->coeffs[ke->iCoeff].Poisson));
+			double lambda = data->coeffs[ke->iCoeff].Poisson * data->coeffs[ke->iCoeff].Yung / (1. + data->coeffs[ke->iCoeff].Poisson) / (1. - 2. * data->coeffs[ke->iCoeff].Poisson);
+
+			string file = "./locals/localG/localG" + std::to_string(iKE) + "_" + std::to_string(a1) + "_" + std::to_string(a2) + ".txt";
+			WriteMatrix(localMatrix, file);
+			int countKnotsInKe = ke->GetCountKnots();
+
+			for (int j = 0; j < countKnotsInKe; j++)
+			{
+				int globalJ = ke->globalNumsKnots[j];
+				for (int k = 0; k < countKnotsInKe; k++)
+				{
+					int globalK = ke->globalNumsKnots[k];
+					globalMatrix->AddElement(globalJ, globalK, lambda * localMatrix[j][k] + sigma * localMatrix2[j][k]);
+				}
+			}
+		}
+	}
+	
+
 }
 
 
-void SLAU::LOC()
+void FEM::LOC()
 {
-	cout << "\n\nВычисления СЛАУ с помощью ЛОС:\n";
+	cout << "\n\nР’С‹С‡РёСЃР»РµРЅРёСЏ РЎР›РђРЈ СЃ РїРѕРјРѕС‰СЊСЋ Р›РћРЎ:\n";
 
 	int slauSize = q.size();
 	int i;
@@ -179,13 +238,13 @@ void SLAU::LOC()
 	double lastnvzk;
 	for (i = 0; i < slauSize; i++)
 		q[i] = 0.;
-	f = MultMatrByVect(A, q);
-	f = MultMatrByVect(A, q);
+	f = A->MultMatrByVect(q);
+	f = A->MultMatrByVect(q);
 
 	for (i = 0; i < slauSize; i++)
 		z[i] = r[i] = d[i] - f[i];
 
-	p = MultMatrByVect(A, z);
+	p = A->MultMatrByVect(z);
 	nvzk = sqrt(CalcScalar(r, r)) / sqrt(CalcScalar(d, d));
 	unsigned int k;
 	for (k = 1; k < 10000000 && nvzk > eps; k++)
@@ -200,7 +259,7 @@ void SLAU::LOC()
 			r[i] -= alfa * p[i];
 		}
 
-		f = MultMatrByVect(A, r);
+		f = A->MultMatrByVect(r);
 		beta = -CalcScalar(p, f) / skp;
 
 		for (i = 0; i < slauSize; i++)
@@ -210,36 +269,32 @@ void SLAU::LOC()
 		}
 
 		nvzk = sqrt(CalcScalar(r, r)) / sqrt(CalcScalar(d, d));
-		if (k % 10000 == 0) cout << "iterations: " << k << "\tНевязка:" << nvzk << endl;
+		if (k % 10000 == 0) cout << "iterations: " << k << "\tРќРµРІСЏР·РєР°:" << nvzk << endl;
 	}
-	cout << "iterations: " << k << "\tНевязка:" << nvzk << endl;
-	cout << "Вычисление СЛАУ закончено.\n\n\n";
+	cout << "iterations: " << k << "\tРќРµРІСЏР·РєР°:" << nvzk << endl;
+	cout << "Р’С‹С‡РёСЃР»РµРЅРёРµ РЎР›РђРЈ Р·Р°РєРѕРЅС‡РµРЅРѕ.\n\n\n";
 
 }
 
-/// <summary>
-/// Вычисление глобальных матриц массы пространственной сетки
-/// </summary>
-/// <param name="data">Входные данные</param>
-vector<vector<double>> SLAU::AssemblingGlobalM(InitialData* data)
-{
-	vector<vector<double>> globalMatrix;
-	int sizeGlobalMatrix = data->knots.size();
-	globalMatrix.resize(sizeGlobalMatrix);
-	for (int i = 0; i < sizeGlobalMatrix; i++)
-		globalMatrix[i].resize(sizeGlobalMatrix);
 
+/// <summary>
+/// Р’С‹С‡РёСЃР»РµРЅРёРµ РіР»РѕР±Р°Р»СЊРЅС‹С… РјР°С‚СЂРёС† РјР°СЃСЃС‹ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРµРЅРЅРѕР№ СЃРµС‚РєРё
+/// </summary>
+/// <param name="data">Р’С…РѕРґРЅС‹Рµ РґР°РЅРЅС‹Рµ</param>
+void FEM::AssemblingGlobalM(NoBlockSM* globalMatrix, InitialData* data)
+{
+	int sizeGlobalMatrix = data->knots.size();
 	int nKEs = data->KEs.size();
 
 	for (int iKE = 0; iKE < nKEs; iKE++)
 	{
 		IKE* ke = data->KEs[iKE];
 
-		double hi = data->coeffs[ke->iCoeff].density;
+		double hi = /*0;*/data->coeffs[ke->iCoeff].density;
 
 		vector<vector<double>> localMatrix = ke->CalcLocalM();
-		string file = "./locals/localM" + std::to_string(iKE) + ".txt";
-		WriteMatrix(localMatrix, file);
+		//string file = "./locals/localM" + std::to_string(iKE) + ".txt";
+		//WriteMatrix(localMatrix, file);
 		int countKnotsInKe = ke->GetCountKnots();
 
 		for (int j = 0; j < countKnotsInKe; j++)
@@ -248,51 +303,12 @@ vector<vector<double>> SLAU::AssemblingGlobalM(InitialData* data)
 			for (int k = 0; k < countKnotsInKe; k++)
 			{
 				int globalK = ke->globalNumsKnots[k];
-				globalMatrix[globalJ][globalK] += hi * localMatrix[j][k];
+				globalMatrix->AddElement(globalJ, globalK, hi * localMatrix[j][k]);
 			}
 		}
 	}
-
-	return globalMatrix;
 }
 
-/// <summary>
-/// Вычисление глобальных матриц жесткости пространственной сетки
-/// </summary>
-/// <param name="data">Входные данные</param>
-vector<vector<double>> SLAU::AssemblingGlobalG(InitialData* data)
-{
-	vector<vector<double>> globalMatrix;
-	int sizeGlobalMatrix = data->knots.size();
-	globalMatrix.resize(sizeGlobalMatrix);
-	for (int i = 0; i < sizeGlobalMatrix; i++)
-		globalMatrix[i].resize(sizeGlobalMatrix);
-
-	int nKEs = data->KEs.size();
-	for (int iKE = 0; iKE < nKEs; iKE++)
-	{
-		IKE* ke = data->KEs[iKE];
-		vector<vector<double>> localMatrix = ke->CalcLocalG();
-		double sigma = data->coeffs[ke->iCoeff].Yung / (2. * (1. + data->coeffs[ke->iCoeff].Poisson));
-		double lambda = data->coeffs[ke->iCoeff].Poisson * data->coeffs[ke->iCoeff].Yung / (1. + data->coeffs[ke->iCoeff].Poisson) / (1. - 2. * data->coeffs[ke->iCoeff].Poisson);
-
-		double coeff = lambda + sigma;
-
-		int countKnotsInKe = ke->GetCountKnots();
-
-		for (int j = 0; j < countKnotsInKe; j++)
-		{
-			int globalJ = ke->globalNumsKnots[j];
-			for (int k = 0; k < countKnotsInKe; k++)
-			{
-				int globalK = ke->globalNumsKnots[k];
-				globalMatrix[globalJ][globalK] += coeff * localMatrix[j][k];
-			}
-		}
-	}
-
-	return globalMatrix;
-}
 
 double CalcTimeCoeff3ForHi(TimeScheme* scheme, int nTime)
 {
@@ -332,78 +348,98 @@ double CalcTimeCoeff4ForHi(TimeScheme* scheme, int nTime)
 	return 2. * hiMult / hiDel;
 }
 
-void SLAU::CalcA(InitialData* data, TimeScheme* scheme) // Вычисление глобальной A
+void FEM::CalcA(InitialData* data, TimeScheme* scheme) // Р’С‹С‡РёСЃР»РµРЅРёРµ РіР»РѕР±Р°Р»СЊРЅРѕР№ A
 {
 	vector<double> timeToCalc = scheme->time;
 
 	for (int i = 0; i < data->knots.size(); i++)
 	{
-		for (int j = 0; j < data->knots.size(); j++)
-		{
-			A[i * 3][j * 3] = G_xx[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
-				+ M[i][j] * CalcTimeCoeff4ForHi(scheme, 3);
+		A->AddElement(i, i, G->d[i]);
+		for (int j = 0; j < 3; j++)
+			A->d[i][j][j] += M->d[i] * CalcTimeCoeff4ForHi(scheme, 3);
+		/*A->d[i][0][0] = **G_xx->d[i] + **G_xx_sigma->d[i] + **G_yy_sigma->d[i] + **G_zz_sigma->d[i]
+				+ **M->d[i] * CalcTimeCoeff4ForHi(scheme, 3);
 
-			A[i * 3 + 1][j * 3 + 1] = G_yy[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
-				+ M[i][j] * CalcTimeCoeff4ForHi(scheme, 3);
+		A->d[i][1][1] = **G_yy->d[i] + **G_xx_sigma->d[i] + **G_yy_sigma->d[i] + **G_zz_sigma->d[i]
+			+ **M->d[i] * CalcTimeCoeff4ForHi(scheme, 3);
 
-			A[i * 3 + 2][j * 3 + 2] = G_zz[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
-				+ M[i][j] * CalcTimeCoeff4ForHi(scheme, 3);
-			//
-			//// Проверка на трехслойку
-			//A[i * 3][j * 3] = G_xx[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
-			//	+ M[i][j] * CalcTimeCoeff3ForHi(scheme, 3);
+		A->d[i][2][2] = **G_zz->d[i] + **G_xx_sigma->d[i] + **G_yy_sigma->d[i] + **G_zz_sigma->d[i]
+			+ **M->d[i] * CalcTimeCoeff4ForHi(scheme, 3);
 
-			//A[i * 3 + 1][j * 3 + 1] = G_yy[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
-			//	+ M[i][j] * CalcTimeCoeff3ForHi(scheme, 3);
-
-			//A[i * 3 + 2][j * 3 + 2] = G_zz[i][j] + G_xx_sigma[i][j] + G_yy_sigma[i][j] + G_zz_sigma[i][j]
-			//	+ M[i][j] * CalcTimeCoeff3ForHi(scheme, 3); 
-
-			A[i * 3][j * 3 + 1] = A[i * 3 + 1][j * 3] = G_xy[i][j];
-
-			A[i * 3][j * 3 + 2] = A[i * 3 + 2][j * 3] = G_xz[i][j];
-
-			A[i * 3 + 1][j * 3 + 2] = A[i * 3 + 2][j * 3 + 1] = G_yz[i][j];
-
-			// Проверка на эллиптическую
-			/*A[i * 3][j * 3] = G_xx[i][j] + G_yy[i][j] + G_zz[i][j] + M[i][j];
-
-			A[i * 3 + 1][j * 3 + 1] = G_xx[i][j] + G_yy[i][j] + G_zz[i][j] + M[i][j];
-
-			A[i * 3 + 2][j * 3 + 2] = G_xx[i][j] + G_yy[i][j] + G_zz[i][j] + M[i][j];*/
-		}
+		A->d[i][0][1] = A->d[i][1][0] = **G_xy->d[i];
+		A->d[i][0][2] = A->d[i][2][0] = **G_xz->d[i];
+		A->d[i][1][2] = A->d[i][2][1] = **G_yz->d[i];*/
 	}
 
-	//cout << endl;
-	//for (int i = 0; i < A.size(); i++)
-	//    cout << A[13][i] << "\t";
-	//cout << endl;
+	for (int i = 0; i < A->l.size(); i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			for (int k = 0; k < 3;k++)
+			{
+				A->l[i][j][k] = G->l[i][j][k];
+				A->u[i][j][k] = G->u[i][j][k];
+			}
+
+			A->l[i][j][j] += M->l[i] * CalcTimeCoeff4ForHi(scheme, 3);
+			A->u[i][j][j] += M->l[i] * CalcTimeCoeff4ForHi(scheme, 3);
+		}
+
+		
+		/*A->l[i][0][0] 
+		A->l[i][0][0] = **G_xx->l[i] + **G_xx_sigma->l[i] + **G_yy_sigma->l[i] + **G_zz_sigma->l[i]
+			+ **M->l[i] * CalcTimeCoeff4ForHi(scheme, 3);
+
+		A->l[i][1][1] = **G_yy->l[i] + **G_xx_sigma->l[i] + **G_yy_sigma->l[i] + **G_zz_sigma->l[i]
+			+ **M->l[i] * CalcTimeCoeff4ForHi(scheme, 3);
+
+		A->l[i][2][2] = **G_zz->l[i] + **G_xx_sigma->l[i] + **G_yy_sigma->l[i] + **G_zz_sigma->l[i]
+			+ **M->l[i] * CalcTimeCoeff4ForHi(scheme, 3);
+
+		A->l[i][0][1] = A->l[i][1][0] = **G_xy->l[i];
+		A->l[i][0][2] = A->l[i][2][0] = **G_xz->l[i];
+		A->l[i][1][2] = A->l[i][2][1] = **G_yz->l[i];
+
+		A->u[i][0][0] = **G_xx->u[i] + **G_xx_sigma->u[i] + **G_yy_sigma->u[i] + **G_zz_sigma->u[i]
+			+ **M->l[i] * CalcTimeCoeff4ForHi(scheme, 3);
+
+		A->u[i][1][1] = **G_yy->u[i] + **G_xx_sigma->u[i] + **G_yy_sigma->u[i] + **G_zz_sigma->u[i]
+			+ **M->u[i] * CalcTimeCoeff4ForHi(scheme, 3);
+
+		A->u[i][2][2] = **G_zz->u[i] + **G_xx_sigma->u[i] + **G_yy_sigma->u[i] + **G_zz_sigma->u[i]
+			+ **M->u[i] * CalcTimeCoeff4ForHi(scheme, 3);
+
+		A->u[i][0][1] = A->u[i][1][0] = **G_xy->u[i];
+		A->u[i][0][2] = A->u[i][2][0] = **G_xz->u[i];
+		A->u[i][1][2] = A->u[i][2][1] = **G_yz->u[i];*/
+	}
+
 }
 
 
 
 
 
-void SLAU::CalcD(InitialData* data, TimeScheme* scheme) // Вычисление глобальной A
+void FEM::CalcD(InitialData* data, TimeScheme* scheme) // Р’С‹С‡РёСЃР»РµРЅРёРµ РіР»РѕР±Р°Р»СЊРЅРѕР№ A
 {
 	vector<double> timeToCalc = scheme->time;
 
 
-	vector<double> b = AssemblingGlobalF(data, timeToCalc[3]);
-
+	vector<double> b;/*AssemblingGlobalF(data, timeToCalc[3]);*/
+	b.resize(data->knots.size()*3, 0);
 	vector<double>Mq_time0_x, Mq_time1_x, Mq_time2_x, Mq_time0_y, Mq_time1_y, Mq_time2_y, Mq_time0_z, Mq_time1_z, Mq_time2_z;
 
-	Mq_time0_x = MultMatrByVect(M, scheme->qx[0]);
-	Mq_time1_x = MultMatrByVect(M, scheme->qx[1]);
-	Mq_time2_x = MultMatrByVect(M, scheme->qx[2]);
+	Mq_time0_x = M->MultMatrByVect(scheme->qx[0]);
+	Mq_time1_x = M->MultMatrByVect(scheme->qx[1]);
+	Mq_time2_x = M->MultMatrByVect(scheme->qx[2]);
 
-	Mq_time0_y = MultMatrByVect(M, scheme->qy[0]);
-	Mq_time1_y = MultMatrByVect(M, scheme->qy[1]);
-	Mq_time2_y = MultMatrByVect(M, scheme->qy[2]);
+	Mq_time0_y = M->MultMatrByVect(scheme->qy[0]);
+	Mq_time1_y = M->MultMatrByVect(scheme->qy[1]);
+	Mq_time2_y = M->MultMatrByVect(scheme->qy[2]);
 
-	Mq_time0_z = MultMatrByVect(M, scheme->qz[0]);
-	Mq_time1_z = MultMatrByVect(M, scheme->qz[1]);
-	Mq_time2_z = MultMatrByVect(M, scheme->qz[2]);
+	Mq_time0_z = M->MultMatrByVect(scheme->qz[0]);
+	Mq_time1_z = M->MultMatrByVect(scheme->qz[1]);
+	Mq_time2_z = M->MultMatrByVect(scheme->qz[2]);
 
 	for (int i = 0; i < data->knots.size(); i++)
 	{
@@ -439,7 +475,7 @@ void SLAU::CalcD(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
 		//	- Mq_time1_z[i] * CalcTimeCoeff3ForHi(scheme, 1);
 
 
-		// Проверка на эллиптическую
+		// РџСЂРѕРІРµСЂРєР° РЅР° СЌР»Р»РёРїС‚РёС‡РµСЃРєСѓСЋ
 		/*d[i * 3] = b[i*3];
 
 		d[i * 3 + 1] = b[i * 3 + 1];
@@ -450,7 +486,7 @@ void SLAU::CalcD(InitialData* data, TimeScheme* scheme) // Вычисление глобальной
 
 }
 
-vector<double> SLAU::AssemblingGlobalF(InitialData* data, double time)
+vector<double> FEM::AssemblingGlobalF(InitialData* data, double time)
 {
 	vector<double> f;
 	f.resize(data->knots.size() * 3);
@@ -495,79 +531,123 @@ vector<double> SLAU::AssemblingGlobalF(InitialData* data, double time)
 	return f;
 }
 
-void SLAU::CalcFirstBoundaryConditions(InitialData* data, double time)
+void FEM::CalcFirstBoundaryConditions(InitialData* data, double time)
 {
 	for (int i = 0; i < data->bounds.size(); i++)
 	{
-		for (int j = 0; j < 4; j++)
+		for (int iKnot = 0; iKnot < 4; iKnot++)
 		{
-			int global_num_coord = data->bounds[i].globalNum[j] * 3;
-			for (int k = 0; k < data->knots.size(); k++)
+			int global_num_coord = data->bounds[i].globalNum[iKnot];
+			for (int r1 = 0; r1 < 3; r1++)
 			{
-				for (int r1 = 0; r1 < 3; r1++)
-					for (int r2 = 0; r2 < 3; r2++)
-						A[global_num_coord + r1][k * 3 + r2] = 0.;
+				for (int r2 = 0; r2 < r1; r2++)
+					A->d[global_num_coord][r2][r1] = A->d[global_num_coord][r1][r2] = 0;
+				A->d[global_num_coord][r1][r1] = 1;
+				
 			}
 
-			A[global_num_coord][global_num_coord] = 1.;
-			A[global_num_coord + 1][global_num_coord + 1] = 1.;
-			A[global_num_coord + 2][global_num_coord + 2] = 1.;
-			d[global_num_coord] = u[global_num_coord];
-			d[global_num_coord + 1] = u[global_num_coord + 1];
-			d[global_num_coord + 2] = u[global_num_coord + 2];
+			
+			for (int j = A->ig[global_num_coord]; j < A->ig[global_num_coord + 1]; j++)
+				for (int r1 = 0; r1 < 3; r1++)
+				{
+					for (int r2 = 0; r2 < 3; r2++)
+						A->l[j][r1][r2] = 0;
+				}
+				
+			for (int j = 0; j < A->ig[data->knots.size()]; j++)
+				if (A->jg[j] == global_num_coord)
+					for (int r1 = 0; r1 < 3; r1++)
+					{
+						for (int r2 = 0; r2 < 3; r2++)
+							A->u[j][r1][r2] = 0;
+					}
+
+			d[global_num_coord*3] = u[global_num_coord*3];
+			d[global_num_coord*3 + 1] = u[global_num_coord*3 + 1];
+			d[global_num_coord*3 + 2] = u[global_num_coord*3 + 2];
 
 			Symmetrization(global_num_coord);
-			Symmetrization(global_num_coord + 1);
-			Symmetrization(global_num_coord + 2);
-			//d[global_num_coord] = 0.;     // Для решения
+			//d[global_num_coord] = 0.;     // Р”Р»СЏ СЂРµС€РµРЅРёСЏ
 
 
-			// БОЛШИМ ЧИСЛОМ
+			// Р‘РћР›РЁРРњ Р§РРЎР›РћРњ
 			//A[global_num_coord][global_num_coord] = 1e+13;
 			//d[global_num_coord] = u[global_num_coord] * 1e+13;
 			//A[global_num_coord+1][global_num_coord+1] = 1e+13;
 			//d[global_num_coord+1] = u[global_num_coord+1] * 1e+13;
 			//A[global_num_coord+2][global_num_coord+2] = 1e+13;
 			//d[global_num_coord+2] = u[global_num_coord+2] * 1e+13;
-			//d[global_num_coord] = 0.* 10e+14;     // Для решения
+			//d[global_num_coord] = 0.* 10e+14;     // Р”Р»СЏ СЂРµС€РµРЅРёСЏ
 		}
 	}
 }
 
-void SLAU::Symmetrization(int i)
+void FEM::Symmetrization(int i)
 {
-	for (int j = 0; j < i; j++)
+	for (int j = A->ig[i]; j < A->ig[i + 1]; j++)
 	{
-		d[j] -= d[i] * A[j][i];
-		A[j][i] = 0;
+		for (int r1 = 0; r1 < 3; r1++)
+		{
+			for (int r2 = 0; r2 < 3; r2++)
+			{
+				d[A->jg[j] * 3 + r1] -= d[i * 3+r1] * A->u[j][r1][r2];
+				A->u[j][r1][r2] = 0;
+			}
+		}
 	}
 
-	for (int j = i+1; j < A.size(); j++)
+
+	int numKnots = A->d.size();
+	for (int iIG = 0; iIG < numKnots; iIG++)
 	{
-		d[j] -= d[i] * A[j][i];
-		A[j][i] = 0;
+		for (int j = A->ig[iIG]; j < A->ig[iIG+1]; j++)
+			if (A->jg[j] == i)
+				for (int r1 = 0; r1 < 3; r1++)
+				{
+					for (int r2 = 0; r2 < 3; r2++)
+					{
+						d[iIG * 3 + r1] -= d[i * 3] * A->l[j][r1][r2];
+						A->l[j][r1][r2] = 0;
+					}
+				}
 	}
+
+
+	//for (int j = 0; j < i; j++)
+	//{
+	//	d[j] -= d[i] * A[j][i];
+	//	A[j][i] = 0;
+	//}
+
+	//for (int j = i+1; j < A.size(); j++)
+	//{
+	//	d[j] -= d[i] * A[j][i];
+	//	A[j][i] = 0;
+	//}
 }
 
-void SLAU::SolveSLAU(InitialData* data, TimeScheme* scheme)
+void FEM::SolveSLAU(InitialData* data, TimeScheme* scheme)
 {
 	u.resize(slauSize, 0.);
 	d.resize(slauSize, 0.);
-	for (int i = 0; i < slauSize; i++) A[i].resize(slauSize, 0.);
-
+	
+	A->Clear();
 
 	CalcU(data, scheme->time[scheme->time.size() - 1]);
-	cout << "Сборка глобальной матрицы А.\n";
+	cout << "РЎР±РѕСЂРєР° РіР»РѕР±Р°Р»СЊРЅРѕР№ РјР°С‚СЂРёС†С‹ Рђ.\n";
 	CalcA(data, scheme);
-	cout << "Сборка глобального вектора d.\n";
+	//A->WriteSparseMatrix("./matrix/A.txt");
+	cout << "РЎР±РѕСЂРєР° РіР»РѕР±Р°Р»СЊРЅРѕРіРѕ РІРµРєС‚РѕСЂР° d.\n";
 	CalcD(data, scheme);
-
-	cout << "Учет первых краевых.\n";
+	
+	cout << "РЈС‡РµС‚ РїРµСЂРІС‹С… РєСЂР°РµРІС‹С….\n";
 	CalcFirstBoundaryConditions(data, scheme->time[scheme->time.size() - 1]);
-	WriteMatrix(A, "./matrix/A.txt");
-	//WriteMatrix(A);
+	//string file = "./matrix/A" + std::to_string(scheme->time[3]) + ".txt";
+	//A->WriteSparseMatrix(file);
 
-	cout << "Решение СЛАУ\n";
+	//file = "./vectors/d" + std::to_string(scheme->time[3]) + ".txt";
+	//WriteVector(d, file);
+	cout << "Р РµС€РµРЅРёРµ РЎР›РђРЈ\n";
 	LOC();
 
 	for (int i = 0; i < data->knots.size(); i++)
@@ -579,28 +659,28 @@ void SLAU::SolveSLAU(InitialData* data, TimeScheme* scheme)
 
 }
 
-void SLAU::CalcU(InitialData* data, double time)
+void FEM::CalcU(InitialData* data, double time)
 {
 	int slauSize = u.size() / 3;
 	for (int j = 0; j < slauSize; j++)
 	{
-		u[j * 3] = GetUx(data->knots[j], time, 0);
-		u[j * 3 + 1] = GetUy(data->knots[j], time, 0);
-		u[j * 3 + 2] = GetUz(data->knots[j], time, 0);
+		u[j * 3] = GetUx(data->knots[j], time, 0, data->knotToGo, data->uToGo);
+		u[j * 3 + 1] = GetUy(data->knots[j], time, 0, data->knotToGo, data->uToGo);
+		u[j * 3 + 2] = GetUz(data->knots[j], time, 0, data->knotToGo, data->uToGo);
 	}
 }
 
-void SLAU::WriteResultForSolution(vector<double> q, double time) //функция вывода в консоль
+void FEM::WriteResultForSolution(vector<double> q, double time) //С„СѓРЅРєС†РёСЏ РІС‹РІРѕРґР° РІ РєРѕРЅСЃРѕР»СЊ
 {
 	ofstream out("./res/Result2.txt", ios_base::out | ios_base::app);
 
-	out << endl << "ВРЕМЯ: " << time << endl;
-	out << endl << "Результат в узлах (веса):" << endl;
+	out << endl << "Р’Р Р•РњРЇ: " << time << endl;
+	out << endl << "Р РµР·СѓР»СЊС‚Р°С‚ РІ СѓР·Р»Р°С… (РІРµСЃР°):" << endl;
 	out << " ___________________________________________________________________ " << endl;
 
 	out.setf(ios::left);
 	out.width(15);
-	out << "| № элемента " << "  | ";
+	out << "| в„– СЌР»РµРјРµРЅС‚Р° " << "  | ";
 	out.width(15);
 	out << "x" << "| ";
 	out.width(15);
@@ -644,35 +724,33 @@ void SLAU::WriteResultForSolution(vector<double> q, double time) //функция вывод
 	out.close();
 }
 
-void SLAU::WriteResultForTest(vector<double> q, double time) //функция вывода в консоль
+void FEM::WriteResultForTest(vector<double> q, double time) //С„СѓРЅРєС†РёСЏ РІС‹РІРѕРґР° РІ РєРѕРЅСЃРѕР»СЊ
 {
 	ofstream out("./res/ResultForTest.txt", ios_base::out | ios_base::app);
 
-	out << endl << "ВРЕМЯ: " << time << endl;
-	out << "Результат в узлах (веса):" << endl;
-	out.setf(ios::left);
-	out.width(15);
-	out << "| № элемента " << "  | ";
-	out.width(15);
-	out << "x" << "| ";
-	out.width(15);
-	out << "y" << "| ";
-	out.width(15);
-	out << "z" << "| ";
-	out.width(15);
-	out << "ux*" << "| ";
-	out.width(15);
-	out << "uy*" << "| ";
-	out.width(15);
-	out << "uz*" << "| ";
+	out << endl << "Р’Р Р•РњРЇ: " << time << endl;
+	//out << "Р РµР·СѓР»СЊС‚Р°С‚ РІ СѓР·Р»Р°С… (РІРµСЃР°):" << endl;
+	//out.setf(ios::left);
 	//out.width(15);
-	//out << "u" << "| ";
-	out.width(15);
-	out << "|ux-ux*|" << "|";
-	out.width(15);
-	out << "|uy-uy*|" << "|";
-	out.width(15);
-	out << "|uz-uz*|" << "|";
+	//out << "| в„– СЌР»РµРјРµРЅС‚Р° " << "  | ";
+	//out.width(15);
+	//out << "x" << "| ";
+	//out.width(15);
+	//out << "y" << "| ";
+	//out.width(15);
+	//out << "z" << "| ";
+	//out.width(15);
+	//out << "ux*" << "| ";
+	//out.width(15);
+	//out << "uy*" << "| ";
+	//out.width(15);
+	//out << "uz*" << "| ";
+	//out.width(15);
+	//out << "|ux-ux*| / |ux|" << "|";
+	//out.width(15);
+	//out << "|uy-uy*| / |uy|" << "|";
+	//out.width(15);
+	//out << "|uz-uz*| / |uz|" << "|";
 	out << endl;
 
 	int slauSize = q.size();
@@ -694,17 +772,17 @@ void SLAU::WriteResultForTest(vector<double> q, double time) //функция вывода в 
 		out << q[i * 3 + 1] << "| ";
 		out.width(15);
 		out << q[i * 3 + 2] << "| ";
-		out.width(15);
-		out << fabs(q[i * 3] - u[i * 3]) << "| ";
-		out.width(15);
-		out << fabs(q[i * 3 + 1] - u[i * 3 + 1]) << "| ";
-		out.width(15);
-		out << fabs(q[i * 3 + 2] - u[i * 3 + 2]) << "| ";
+		//out.width(15);
+		//out << fabs(q[i * 3] - u[i * 3]) / fabs(u[i * 3]) << "| ";
+		//out.width(15);
+		//out << fabs(q[i * 3 + 1] - u[i * 3 + 1]) / fabs(u[i * 3 + 1]) << "| ";
+		//out.width(15);
+		//out << fabs(q[i * 3 + 2] - u[i * 3 + 2]) / fabs(u[i * 3 + 2]) << "| ";
 		out << endl;
 	}
 }
 
-void SLAU::CreateArea(InitialData* data)
+void FEM::CreateArea(InitialData* data)
 {
 	for (int i = 0; i < knots.size(); i++)
 	{
@@ -737,7 +815,7 @@ void SLAU::CreateArea(InitialData* data)
 
 }
 
-void SLAU::FindIKeForArea(InitialData* data)
+void FEM::FindIKeForArea(InitialData* data)
 {
 	KnotsIKEs.resize(xArea.size() * yArea.size() * zArea.size());
 
@@ -755,7 +833,7 @@ void SLAU::FindIKeForArea(InitialData* data)
 	}
 }
 
-void SLAU::SolveInAreaForTest(InitialData* data, double time)
+void FEM::SolveInAreaForTest(InitialData* data, double time)
 {
 
 	if (xArea.size() == 0 || yArea.size() == 0 || zArea.size() == 0)
@@ -817,6 +895,7 @@ void SLAU::SolveInAreaForTest(InitialData* data, double time)
 					out1 << knot->y << " ";
 					out2 << knot->y << " ";
 
+					out.precision(10);
 					out.width(15);
 					out << result_x << " ";
 
@@ -827,9 +906,9 @@ void SLAU::SolveInAreaForTest(InitialData* data, double time)
 					out2 << result_z << " ";
 
 
-					/*trueResult_x = GetUx(*knot, time);
-					trueResult_y = GetUy(*knot, time);
-					trueResult_z = GetUz(*knot, time);
+					trueResult_x = GetUx(*knot, time,0, data->knotToGo, data->uToGo);
+					trueResult_y = GetUy(*knot, time,0, data->knotToGo, data->uToGo);
+					trueResult_z = GetUz(*knot, time,0, data->knotToGo, data->uToGo);
 					diffResult_x = abs(trueResult_x - result_x);
 					diffResult_y = abs(trueResult_y - result_y);
 					diffResult_z = abs(trueResult_z - result_z);
@@ -852,7 +931,7 @@ void SLAU::SolveInAreaForTest(InitialData* data, double time)
 					out1 << diffResult_y << " ";
 
 					out2.width(15);
-					out2 << diffResult_z << " ";*/
+					out2 << diffResult_z << " ";
 
 					out << endl;
 					out1 << endl;
@@ -870,7 +949,7 @@ void SLAU::SolveInAreaForTest(InitialData* data, double time)
 }
 
 
-void SLAU::SolveInArea(InitialData* data, double time) //функция вывода в консоль
+void FEM::SolveInArea(InitialData* data, double time) //С„СѓРЅРєС†РёСЏ РІС‹РІРѕРґР° РІ РєРѕРЅСЃРѕР»СЊ
 {
 	set<double> x, y, z;
 
@@ -916,13 +995,13 @@ void SLAU::SolveInArea(InitialData* data, double time) //функция вывода в консол
 
 	ofstream out(str);
 
-	/*out << endl << "ВРЕМЯ: " << time << endl;
-	out << endl << "Результат в узлах (веса):" << endl;
+	/*out << endl << "Р’Р Р•РњРЇ: " << time << endl;
+	out << endl << "Р РµР·СѓР»СЊС‚Р°С‚ РІ СѓР·Р»Р°С… (РІРµСЃР°):" << endl;
 	out << " _____________________________________________________________________________________ " << endl;
 
 	out.setf(ios::left);
 	out.width(15);
-	out << "| № элемента " << "  | ";
+	out << "| в„– СЌР»РµРјРµРЅС‚Р° " << "  | ";
 	out.width(15);
 	out << "x" << "| ";
 	out.width(15);
@@ -985,7 +1064,7 @@ void SLAU::SolveInArea(InitialData* data, double time) //функция вывода в консол
 	if (out.is_open())out.close();
 }
 
-int SLAU::FindIKe(InitialData* data, Knot* knot)
+int FEM::FindIKe(InitialData* data, Knot* knot)
 {
 	int iKe = 0;
 	for (; iKe < data->KEs.size(); iKe++)
@@ -996,12 +1075,12 @@ int SLAU::FindIKe(InitialData* data, Knot* knot)
 		}
 	}
 
-	cout << "Точка - " << knot->x << " " << knot->y << " " << knot->z << " - находится вне расчетной области\n";
+	cout << "РўРѕС‡РєР° - " << knot->x << " " << knot->y << " " << knot->z << " - РЅР°С…РѕРґРёС‚СЃСЏ РІРЅРµ СЂР°СЃС‡РµС‚РЅРѕР№ РѕР±Р»Р°СЃС‚Рё\n";
 
 	return -1;
 }
 
-double SLAU::SolveInPoint(InitialData* data, Knot knot)
+double FEM::SolveInPoint(InitialData* data, Knot knot)
 {
 	int iKe = 0;
 	for (; iKe < data->KEs.size(); iKe++)
@@ -1012,7 +1091,7 @@ double SLAU::SolveInPoint(InitialData* data, Knot knot)
 		}
 	}
 
-	cout << "Точка - " << knot.x << " " << knot.y << " " << knot.z << " - находится вне расчетной области";
+	cout << "РўРѕС‡РєР° - " << knot.x << " " << knot.y << " " << knot.z << " - РЅР°С…РѕРґРёС‚СЃСЏ РІРЅРµ СЂР°СЃС‡РµС‚РЅРѕР№ РѕР±Р»Р°СЃС‚Рё";
 	return 0;
 }
 

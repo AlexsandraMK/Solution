@@ -5,6 +5,7 @@
 struct TimeGrid
 {
     double start;
+    double timeToGo;
     double startAfterTime3;	// Начальное время
     double end;	// Конечное время
     int nStepsAfterTime3;	// Количество шагов по времени
@@ -32,6 +33,8 @@ public:
     vector<IKE*> KEs;
     vector<Bound> bounds; // Массив границ
     vector<Coeff> coeffs;
+    Knot* knotToGo;
+    Knot* uToGo;
     TimeGrid* timeGrid;
     InitialData();
 
@@ -42,6 +45,7 @@ protected:
     void ReadKEs(string pathFile);
     void ReadBounds(string pathFile);
     void ReadTime(string pathFile);
+    void ReadPointToGo(string pathFile);
     
 };
 

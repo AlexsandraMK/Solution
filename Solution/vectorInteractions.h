@@ -126,6 +126,8 @@ static void WriteMatrix(std::vector< std::vector<double>> matrix, std::string pa
 	out.close();
 }
 
+
+
 static void WriteVector(std::vector<double> vector, std::string pathFile)
 {
 	std::ofstream out(pathFile);

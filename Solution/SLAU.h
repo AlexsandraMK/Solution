@@ -2,33 +2,58 @@
 #include "TimeScheme.h"
 #include <set>
 
-class SLAU
+
+class NoBlockSM
+{
+
+public:
+	vector<int> ig, jg;
+	vector<double> l, u, d;
+	NoBlockSM(InitialData* data);
+	int ReadSparseMatrix(string pathFile);
+
+	void WriteSparseMatrix(string pathFile);
+
+	void AddElement(int i, int j, double elem);
+
+	vector<double> MultMatrByVect(vector<double> b);
+
+	
+};
+
+class Block_3_SM
+{
+
+public:
+	vector<int> ig, jg;
+	vector<double**> l, u, d;
+	int ReadSparseMatrix(string pathFile);
+	void WriteSparseMatrix(string pathFile);
+	void AddToBlock(double** to, double into[3][3]);
+	void AddToBlock(double** to, double** into);
+	void AddElement(int i, int j, double elem[3][3]);
+	void AddElement(int i, int j, double** elem);
+	vector<double> MultMatrByVect(vector<double> b);
+	Block_3_SM(InitialData* data);
+	void Clear();
+};
+
+
+class FEM
 {
 public:
 	void SolveSLAU(InitialData* data, TimeScheme* scheme);
-	SLAU(InitialData* data);
 
+	FEM(InitialData* data);
 
-	
 	void WriteResultForSolution(vector<double> q, double time);
 	void WriteResultForTest(vector<double> q, double time);
-	void CreateArea(InitialData* data);
-	void FindIKeForArea(InitialData* data);
 	void SolveInAreaForTest(InitialData* data, double time);
 	void SolveInArea(InitialData* data, double time);
-	int FindIKe(InitialData* data, Knot* knot);
 	double SolveInPoint(InitialData* data, Knot knot);
-	vector<vector<double>> A;
-	vector<vector<double>> M;
-	vector<vector<double>> G_xx_sigma;
-	vector<vector<double>> G_yy_sigma;
-	vector<vector<double>> G_zz_sigma;
-	vector<vector<double>> G_xx;
-	vector<vector<double>> G_yy;
-	vector<vector<double>> G_zz;
-	vector<vector<double>> G_xy;
-	vector<vector<double>> G_xz;
-	vector<vector<double>> G_yz;
+	Block_3_SM* A;
+	NoBlockSM* M;
+	Block_3_SM* G;
 	vector<double> q;
 	vector<double> qx;
 	vector<double> qy;
@@ -42,9 +67,12 @@ protected:
 	set<double> xArea, yArea, zArea;
 	vector<int> KnotsIKEs;
 	void LOC();
-	vector<vector<double>> AssemblingGlobalM(InitialData* data);
-	vector<vector<double>> AssemblingGlobalG(InitialData* data);
-	vector<vector<double>> AssemblingGlobalG_aa(InitialData* data, axis a1, axis a2, int iCoeff);
+	void AssemblingGlobalM(NoBlockSM* globalMatrix, InitialData* data);
+	void AssemblingGlobalBlockG(Block_3_SM* globalMatrix, InitialData* data);
+	void AssemblingGlobalG_aa(NoBlockSM* globalMatrix, InitialData* data, axis a1, axis a2, int iCoeff);
+	void CreateArea(InitialData* data);
+	void FindIKeForArea(InitialData* data);
+	int FindIKe(InitialData* data, Knot* knot);
 	void CalcA(InitialData* data, TimeScheme* scheme);
 	void CalcD(InitialData* data, TimeScheme* scheme);
 	void CalcU(InitialData* data, double time);

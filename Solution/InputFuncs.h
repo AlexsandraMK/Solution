@@ -8,9 +8,9 @@ double GetFz(Knot coord, double time);
 
 
 double GetU(Knot coord, double time);
-double GetUx(Knot coord, double time, double timeToGo);
-double GetUy(Knot coord, double time, double timeToGo);
-double GetUz(Knot coord, double time, double timeToGo);
+double GetUx(Knot coord, double time, double timeToGo, Knot* knotToGo, Knot* uToGo);
+double GetUy(Knot coord, double time, double timeToGo, Knot* knotToGo, Knot* uToGo);
+double GetUz(Knot coord, double time, double timeToGo, Knot* knotToGo, Knot* uToGo);
 
 enum axis
 {

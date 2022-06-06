@@ -63,6 +63,9 @@
     <ClCompile Include="GaussSolverSLAE.cpp">
       <Filter>Исходные файлы\SLAU_IMPL</Filter>
     </ClCompile>
+    <ClCompile Include="SparseMatrix.cpp">
+      <Filter>Исходные файлы\SLAU_IMPL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IKE.h">

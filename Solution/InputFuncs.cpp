@@ -11,8 +11,9 @@ double GetFx(Knot coord, double time)
     //return -3. * coord.z; // z^4
     //return 2.; // t^2
     //return 6. * time;   // t^3
-    //return 12. * time * time;   //t^4
-
+    return 1000.*12. * time * time;   //t^4
+    //return 1000 * 20. * time * time * time;   //t^5
+    //return 1000 * 30. * time * time * time * time;   //t^6
     // Проверка на эллиптическую
     //return 1;
     /*return coord.x + coord.y;*/
@@ -33,8 +34,9 @@ double GetFy(Knot coord, double time)
     //return -3. * coord.z; // z^4
     //return 2.; // t^2
     //return 6. * time;   // t^3
-    return 12. * time * time;   //t^4
-
+    return 1000. * 12. * time * time;   //t^4
+    //return 1000 * 20. * time * time * time;   //t^5
+    //return 1000 * 30. * time * time * time * time;   //t^6
 
     // Проверка на эллиптическую
     //return 1;
@@ -56,8 +58,9 @@ double GetFz(Knot coord, double time)
     //return -3. * coord.x; // x^4
     //return 2.; // t^2
     //return 6. * time;   // t^3
-    return 12. * time * time;   //t^4
-
+    return 1000. * 12. * time * time;   //t^4
+    return 1000 * 20. * time * time * time;   //t^5
+    //return 1000 * 30. * time * time * time * time;   //t^6
 
     // Проверка на эллиптическую
     //return 1;
@@ -72,16 +75,16 @@ double GetFz(Knot coord, double time)
 
 
 
-double GetUx(Knot coord, double time, double timeToGo)
+double GetUx(Knot coord, double time, double timeToGo, Knot* knotToGo, Knot* uToGo)
 {
-    Knot* knot_to_go = new Knot(0.0266667, 0., 2.5);
     if (time == timeToGo && (
-        coord.x == knot_to_go->x && coord.y == knot_to_go->y && coord.z == knot_to_go->z)
+        coord.x == knotToGo->x && coord.y == knotToGo->y && coord.z == knotToGo->z)
         )
-        return 0.04 - knot_to_go->x;
+        return uToGo->x;
     else return 0.;
-
+    //if(time == 0 || time == 1e-5 || time ==2e-5) return 0;
     //return 1.;
+    //return coord.x;
     //return coord.x + coord.y;
     //return coord.x + coord.y + coord.z;
     //return coord.x * coord.x;
@@ -96,15 +99,25 @@ double GetUx(Knot coord, double time, double timeToGo)
     //return time ;
     //return time * time;
     //return time * time * time;
-    //return time * time * time * time;
-
+    return time * time * time * time;
+    return time * time * time * time * time;
+    //return time * time * time * time * time * time;
     return coord.x * time;
     
 };
-double GetUy(Knot coord, double time, double timeToGo)
+
+
+double GetUy(Knot coord, double time, double timeToGo, Knot* knotToGo, Knot* uToGo)
 {
-    return 0.;
+    if (time == timeToGo && (
+        coord.x == knotToGo->x && coord.y == knotToGo->y && coord.z == knotToGo->z)
+        )
+        return uToGo->y;
+    else return 0.;
+
+    //if (time == 0 || time == 1e-5 || time == 2e-5) return 0.;
     //return 1.;
+    //return coord.x;
     //return coord.x + coord.y;
     //return coord.x + coord.y + coord.z;
     //return coord.x * coord.x;
@@ -122,12 +135,20 @@ double GetUy(Knot coord, double time, double timeToGo)
     //return time * time;
     //return time * time * time;
     return time * time * time * time;
+    return time * time * time * time * time;
+    //return time * time * time * time * time * time;
 };
 
-double GetUz(Knot coord, double time, double timeToGo)
+double GetUz(Knot coord, double time, double timeToGo, Knot* knotToGo, Knot* uToGo)
 {
-    return 0.;
+    if (time == timeToGo && (
+        coord.x == knotToGo->x && coord.y == knotToGo->y && coord.z == knotToGo->z)
+        )
+        return uToGo->z;
+    else return 0.;
+    //if (time == 0 || time == 1e-5 || time == 2e-5) return 0.;
     //return 1.;
+    //return coord.x;
     //return coord.x + coord.y;
     //return coord.x + coord.y + coord.z;
     //return coord.x * coord.x;
@@ -144,6 +165,8 @@ double GetUz(Knot coord, double time, double timeToGo)
     //return time * time;
     //return time * time * time;
     return time * time * time * time;
+    return time * time * time * time * time;
+    //return time * time * time * time * time * time;
 };
 
 

@@ -195,8 +195,9 @@
     vector<vector<double>> TriangularPrism::CalcLocalG_aa_xz_yz(axis a1, axis a2)
     {
         vector<vector<double>> MGz = CalcMGz();
-        vector<vector<double>> MGa = base->CalcLocalMG(a1);
-
+        vector<vector<double>> MGa;
+        MGa = a1 != z ? base->CalcLocalMG(a1) : base->CalcLocalMG(a2);
+       
         vector<vector<double>> G;
         G.resize(COUNT_KNOTS);
         int muI = 0, muJ = 0, nuI = 0, nuJ = 0;
@@ -227,7 +228,7 @@
         vector<vector<double>> G;
         if (a1 == z && a2 == z) G = CalcLocalG_aa_zz(a1, a2);
         else
-            if (a2 == z) G = CalcLocalG_aa_xz_yz(a1, a2);
+            if (a2 == z || a1 == z) G = CalcLocalG_aa_xz_yz(a1, a2);
             else G = CalcLocalG_aa_xx_yy_xy(a1, a2);
 
         return G;
@@ -258,6 +259,7 @@
 
     bool TriangularPrism::IsIn(Knot knot)
     {
+        if (base == NULL) CreateBase();
         if (knots[0].z <= knot.z && knot.z <= knots[COUNT_KNOTS - 1].z
             && base->IsIn(knot)) return true;
         

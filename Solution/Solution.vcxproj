@@ -147,6 +147,7 @@
     <ClCompile Include="IntegrationFunc.h" />
     <ClCompile Include="SLAU.cpp" />
     <ClCompile Include="MAIN.cpp" />
+    <ClCompile Include="SparseMatrix.cpp" />
     <ClCompile Include="TimeScheme.cpp" />
     <ClCompile Include="Triangle.cpp" />
     <ClCompile Include="TriangularPrism.cpp" />

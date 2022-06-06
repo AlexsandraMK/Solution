@@ -15,7 +15,7 @@ TimeScheme::TimeScheme(InitialData* data)
     double SLAUsize = data->knots.size();
     time.resize(4);
     time[0] = timeGrid->start;
-    time[1] = time[0] + (timeGrid->startAfterTime3 - timeGrid->start) / 2.;
+    time[1] = timeGrid->timeToGo;
     time[2] = timeGrid->startAfterTime3;
     time[3] = time[2] + h;
 
@@ -24,7 +24,7 @@ TimeScheme::TimeScheme(InitialData* data)
     {
         double timeJ = time[j];
         qx[j].resize(SLAUsize);
-        for (int i = 0; i < SLAUsize; i++) qx[j][i] = GetUx(data->knots[i], timeJ, time[1]);
+        for (int i = 0; i < SLAUsize; i++) qx[j][i] = GetUx(data->knots[i], timeJ, time[1], data->knotToGo, data->uToGo);
     }
 
     qy.resize(4);
@@ -32,7 +32,7 @@ TimeScheme::TimeScheme(InitialData* data)
     {
         double timeJ = time[j];
         qy[j].resize(SLAUsize);
-        for (int i = 0; i < SLAUsize; i++) qy[j][i] = GetUy(data->knots[i], timeJ, time[1]);
+        for (int i = 0; i < SLAUsize; i++) qy[j][i] = GetUy(data->knots[i], timeJ, time[1], data->knotToGo, data->uToGo);
     }
 
     qz.resize(4);
@@ -40,7 +40,7 @@ TimeScheme::TimeScheme(InitialData* data)
     {
         double timeJ = time[j];
         qz[j].resize(SLAUsize);
-        for (int i = 0; i < SLAUsize; i++) qz[j][i] = GetUz(data->knots[i], timeJ, time[1]);
+        for (int i = 0; i < SLAUsize; i++) qz[j][i] = GetUz(data->knots[i], timeJ, time[1], data->knotToGo, data->uToGo);
     }
 }
 

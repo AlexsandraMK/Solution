@@ -21,7 +21,26 @@ InitialData::InitialData()
 	timeGrid = new TimeGrid();
 	ReadTime("grid_time.txt");
 
+	ReadPointToGo("pointAndU.txt");
+
 	cout << "Чтение данных завершено.\n";
+}
+
+void InitialData::ReadPointToGo(string pathFile)
+{
+	cout << "\tЧтение точки для запуска: ";
+	knotToGo = new Knot(-100, -100, -100);
+	uToGo = new Knot(-100, -100, -100);
+	ifstream in(pathFile);
+	if (!in.is_open())
+	{
+		cout << "\tфайл не открыт\n";
+		return;
+	}
+	in >> knotToGo->x >> knotToGo->y >> knotToGo->z;
+	in >> uToGo->x >> uToGo->y >> uToGo->z;
+	in.close();
+	cout << "\tуспешно\n";
 }
 
 /// <summary>
@@ -170,7 +189,7 @@ void InitialData::ReadTime(string pathFile)
 		cout << "\tфайл не открыт\n";
 		return;
 	}
-	in >> timeGrid->start >> timeGrid->startAfterTime3 >> timeGrid->end >> timeGrid->kAfterTime3 >> timeGrid->nStepsAfterTime3;
+	in >> timeGrid->start >> timeGrid->timeToGo >> timeGrid->startAfterTime3 >> timeGrid->end >> timeGrid->kAfterTime3 >> timeGrid->nStepsAfterTime3;
 	in.close();
 	cout << "\tуспешно\n";
 }

@@ -28,7 +28,6 @@ vector<vector<double>> Hexagon::CalcLocalM()
         for (int j = 0; j < COUNT_KNOTS; j++)
             M[i][j] = Integrate(Mij, i, j);
     }
-        
 
     return M;
 }
@@ -150,6 +149,7 @@ vector<vector<double>> Hexagon::CalcJacobian(vector<double> integrationVars)
         {   CalcScalar(x, diffPhiByTheta),  CalcScalar(y, diffPhiByTheta),  CalcScalar(z, diffPhiByTheta)   }
     };
 
+    //WriteMatrix(Jacobian, "./matrix/J.txt");
     return Jacobian;
 }
 
